@@ -2,12 +2,10 @@ package com.bad.ctrlz.views.components;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Nav;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.theme.lumo.LumoUtility;
-import com.bad.ctrlz.views.MainView;
-// import com.bad.ctrlz.views.OtraVista; // Descomenta si tienes otra vista
+// import com.vaadin.flow.component.html.Nav;
+// import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+// import com.vaadin.flow.router.RouterLink;
+// import com.bad.ctrlz.views.MainView;
 
 public class Navbar extends AppLayout {
 
@@ -21,20 +19,20 @@ public class Navbar extends AppLayout {
                 .set("position", "absolute");
 
         // Enlaces de navegación
-        RouterLink inicioLink = new RouterLink("Inicio", MainView.class);
+        // RouterLink inicioLink = new RouterLink("Inicio", MainView.class);
         // RouterLink otraVista = new RouterLink("Otra Sección", OtraVista.class); // Usa esta línea cuando tengas la clase OtraVista
-        RouterLink otraVista = new RouterLink("Otra Sección", MainView.class); // Temporal, hasta que tengas OtraVista
+        // RouterLink otraVista = new RouterLink("Otra Sección", MainView.class); // Temporal, hasta que tengas OtraVista
 
         // Barra horizontal de navegación
-        HorizontalLayout navLinks = new HorizontalLayout(inicioLink, otraVista);
-        navLinks.setSpacing(true);
-        navLinks.setPadding(true);
+        // HorizontalLayout navLinks = new HorizontalLayout(inicioLink, otraVista);
+        // navLinks.setSpacing(true);
+        // navLinks.setPadding(true);
 
         // Contenedor de navegación (opcional, si deseas estilizar con <nav>)
-        Nav nav = new Nav(navLinks);
+        //Nav nav = new Nav(navLinks);
 
         // Agregar elementos a la barra superior
-        addToNavbar(logo, nav);
+        addToNavbar(logo);
     }
 }
 
