@@ -291,9 +291,9 @@ public class LoginView extends VerticalLayout {
         notification.open();
     }
 
-    private void showErrorNotification(String message) {
-        Notification notification = new Notification(message, 3000, Notification.Position.TOP_CENTER);
-        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        notification.open();
-    }
+    // private void showErrorNotification(String message) {
+    //     Notification notification = new Notification(message, 3000, Notification.Position.TOP_CENTER);
+    //     notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+    //     notification.open();
+    // }
 }
