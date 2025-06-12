@@ -1,214 +1,299 @@
 package com.bad.ctrlz.views.Seguridad;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 
 @Route("login")
-@PageTitle("Bienvenido a CtrlZ")
+@PageTitle("Autenticación")
+@CssImport("./styles/auth-view.css")
 public class LoginView extends VerticalLayout {
 
     private Tabs tabs;
+    private Div pages;
     private Tab loginTab;
     private Tab registerTab;
-
-    // Componentes del Login
-    private TextField loginUsername;
-    private PasswordField loginPassword;
-    private Button loginButton;
-    private Div loginForm;
-
-    // Componentes del Registro
-    private TextField registerUsername;
-    private EmailField registerEmail;
-    private PasswordField registerPassword;
-    private PasswordField confirmPassword;
-    private Button registerButton;
-    private Div registerForm;
-
-    // Constructor para crear las pestañas de Login y Registro
-    private void createTabs() {
-        loginTab = new Tab("Iniciar Sesión");
-        registerTab = new Tab("Registrarse");
-
-        tabs = new Tabs(loginTab, registerTab);
-        tabs.setWidthFull();
-        tabs.getStyle().set("margin-bottom", "20px");
-
-        // Listener para cambiar entre formularios
-        tabs.addSelectedChangeListener(event -> {
-            if (tabs.getSelectedTab() == loginTab) {
-                showLoginForm();
-            } else {
-                showRegisterForm();
-            }
-        });
-    }
+    private Component loginForm;
+    private Component registerForm;
+    private Component resetPasswordForm;
+    private boolean isResetPasswordVisible = false;
 
     public LoginView() {
-        // Configurar el layout principal
+        addClassName("auth-view");
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
 
-        // Crear la plantilla
-        createAuthTemplate();
+        Div card = createCard();
+        add(card);
     }
 
-    private void createAuthTemplate() {
-        // Contenedor principal
-        Div authCard = new Div();
-        authCard.setWidth("400px");
-        authCard.getStyle()
-                .set("padding", "30px")
-                .set("border-radius", "10px")
-                .set("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
-                .set("background-color", "white");
+    private Div createCard() {
+        Div card = new Div();
+        card.addClassName("auth-card");
+        card.setWidth("400px");
+        card.getStyle()
+            .set("padding", "30px")
+            .set("border-radius", "10px")
+            .set("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
+            .set("background-color", "white");
 
-        // Título
-        H1 title = new H1("Bienvenido");
-        H2 title2 = new H2("Inicio sesión o registro");
-        title2.getStyle().set("margin-top", "10px");
+        H2 title = new H2("Bienvenido");
+        title.addClassName("auth-title");
         title.getStyle()
-                .set("text-align", "center")
-                .set("color", "#2c3e50")
-                .set("margin-bottom", "20px")
-                .set("font-size", "2rem");
+            .set("text-align", "center")
+            .set("color", "#2c3e50")
+            .set("margin-bottom", "10px");
 
-        // Crear tabs
+        Paragraph description = new Paragraph("Inicia sesión o crea una nueva cuenta");
+        description.addClassName("auth-description");
+        description.getStyle()
+            .set("text-align", "center")
+            .set("color", "#7f8c8d")
+            .set("margin-bottom", "20px");
+
+        VerticalLayout header = new VerticalLayout(title, description);
+        header.setPadding(false);
+        header.setSpacing(false);
+        header.setAlignItems(Alignment.CENTER);
+
+        // Crear pestañas y contenido
         createTabs();
+        createForms();
 
-        // Crear formularios
-        createLoginForm();
-        createRegisterForm();
+        VerticalLayout content = new VerticalLayout(header, tabs, pages);
+        content.setPadding(true);
+        content.setSpacing(true);
+        content.setAlignItems(Alignment.STRETCH);
 
-        // Crear enlace de recuperar contraseña
-        Button forgotPasswordLink = new Button("¿Olvidaste tu contraseña?");
-        forgotPasswordLink.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        forgotPasswordLink.getStyle()
-                .set("margin-top", "15px")
-                .set("color", "#3498db")
-                .set("text-decoration", "underline")
-                .set("font-size", "14px")
-                .set("background", "none")
-                .set("border", "none")
-                .set("cursor", "pointer");
-
-        forgotPasswordLink.addClickListener(e -> {
-            // Aquí iría la lógica para recuperar contraseña
-            System.out.println("Recuperar contraseña clickeado");
-        });
-
-        // Agregar componentes al contenedor
-        authCard.add(title,title2, tabs, loginForm, registerForm, forgotPasswordLink);
-
-        // Agregar el contenedor a la vista
-        add(authCard);
-
-        // Estilo del fondo de la página
-        getStyle()
-                .set("background", "linear-gradient(135deg, #667eea 0%, #764ba2 100%)")
-                .set("min-height", "100vh");
+        card.add(content);
+        return card;
     }
 
-    private void createLoginForm() {
-        loginForm = new Div();
+    private void createTabs() {
+        loginTab = new Tab("Iniciar Sesión");
+        registerTab = new Tab("Registrarse");
+        
+        tabs = new Tabs(loginTab, registerTab);
+        tabs.setWidthFull();
+        tabs.getStyle().set("margin-bottom", "20px");
+        tabs.addSelectedChangeListener(event -> {
+            if (isResetPasswordVisible) {
+                showAuthTabs();
+            } else {
+                updateContent();
+            }
+        });
+        
+        pages = new Div();
+        pages.setSizeFull();
+    }
 
-        // Campo de usuario
-        loginUsername = new TextField("Usuario");
-        loginUsername.setPlaceholder("Ingresa tu usuario");
-        loginUsername.setWidthFull();
-        loginUsername.getStyle().set("margin-bottom", "15px");
+    private void createForms() {
+        loginForm = createLoginForm();
+        registerForm = createRegisterForm();
+        resetPasswordForm = createResetPasswordForm();
+        
+        pages.add(loginForm, registerForm, resetPasswordForm);
+        loginForm.setVisible(true);
+        registerForm.setVisible(false);
+        resetPasswordForm.setVisible(false);
+    }
 
-        // Campo de contraseña
-        loginPassword = new PasswordField("Contraseña");
-        loginPassword.setPlaceholder("Ingresa tu contraseña");
-        loginPassword.setWidthFull();
-        loginPassword.getStyle().set("margin-bottom", "20px");
-
-        // Botón de login
-        loginButton = new Button("Iniciar Sesión");
+    private Component createLoginForm() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.addClassName("auth-form");
+        
+        EmailField emailField = new EmailField("Email");
+        emailField.setPrefixComponent(VaadinIcon.ENVELOPE.create());
+        emailField.setWidthFull();
+        emailField.setPlaceholder("tu@email.com");
+        emailField.setRequired(true);
+        emailField.getStyle().set("margin-bottom", "15px");
+        
+        PasswordField passwordField = new PasswordField("Contraseña");
+        passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
+        passwordField.setWidthFull();
+        passwordField.setPlaceholder("••••••••");
+        passwordField.setRequired(true);
+        passwordField.getStyle().set("margin-bottom", "20px");
+        
+        Button loginButton = new Button("Iniciar Sesión");
         loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         loginButton.setWidthFull();
         loginButton.getStyle()
-                .set("height", "45px")
-                .set("font-weight", "bold");
-
-        // Evento del botón login
-        loginButton.addClickListener(e -> {
-            System.out.println("LOGIN - Usuario: " + loginUsername.getValue());
-            System.out.println("LOGIN - Contraseña: " + loginPassword.getValue());
+            .set("height", "45px")
+            .set("font-weight", "bold");
+        
+        Button forgotPasswordButton = new Button("¿Olvidaste tu contraseña?");
+        forgotPasswordButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        forgotPasswordButton.getStyle()
+            .set("margin-top", "15px")
+            .set("color", "#3498db");
+        forgotPasswordButton.addClickListener(e -> showResetPasswordForm());
+        
+        // Eventos de prueba
+        loginButton.addClickListener(event -> {
+            System.out.println("LOGIN - Email: " + emailField.getValue());
+            System.out.println("LOGIN - Password: " + passwordField.getValue());
+            showSuccessNotification("¡Inicio de sesión exitoso!");
         });
-
-        // Agregar componentes al formulario
-        loginForm.add(loginUsername, loginPassword, loginButton);
+        
+        formLayout.add(emailField, passwordField, loginButton, forgotPasswordButton);
+        return formLayout;
     }
 
-    private void createRegisterForm() {
-        registerForm = new Div();
-        registerForm.setVisible(false); // Oculto por defecto
-
-        // Campo de usuario
-        registerUsername = new TextField("Usuario");
-        registerUsername.setPlaceholder("Elige un nombre de usuario");
-        registerUsername.setWidthFull();
-        registerUsername.getStyle().set("margin-bottom", "15px");
-
-        // Campo de email
-        registerEmail = new EmailField("Email");
-        registerEmail.setPlaceholder("tu@email.com");
-        registerEmail.setWidthFull();
-        registerEmail.getStyle().set("margin-bottom", "15px");
-
-        // Campo de contraseña
-        registerPassword = new PasswordField("Contraseña");
-        registerPassword.setPlaceholder("Ingresa una contraseña");
-        registerPassword.setWidthFull();
-        registerPassword.getStyle().set("margin-bottom", "15px");
-
-        // Campo de confirmar contraseña
-        confirmPassword = new PasswordField("Confirmar Contraseña");
-        confirmPassword.setPlaceholder("Confirma tu contraseña");
-        confirmPassword.setWidthFull();
-        confirmPassword.getStyle().set("margin-bottom", "20px");
-
-        // Botón de registro
-        registerButton = new Button("Registrarse");
+    private Component createRegisterForm() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.addClassName("auth-form");
+        
+        TextField nameField = new TextField("Nombre completo");
+        nameField.setPrefixComponent(VaadinIcon.USER.create());
+        nameField.setWidthFull();
+        nameField.setPlaceholder("Tu nombre completo");
+        nameField.setRequired(true);
+        nameField.getStyle().set("margin-bottom", "15px");
+        
+        EmailField emailField = new EmailField("Email");
+        emailField.setPrefixComponent(VaadinIcon.ENVELOPE.create());
+        emailField.setWidthFull();
+        emailField.setPlaceholder("tu@email.com");
+        emailField.setRequired(true);
+        emailField.getStyle().set("margin-bottom", "15px");
+        
+        PasswordField passwordField = new PasswordField("Contraseña");
+        passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
+        passwordField.setWidthFull();
+        passwordField.setPlaceholder("••••••••");
+        passwordField.setRequired(true);
+        passwordField.getStyle().set("margin-bottom", "15px");
+        
+        PasswordField confirmPasswordField = new PasswordField("Confirmar contraseña");
+        confirmPasswordField.setPrefixComponent(VaadinIcon.LOCK.create());
+        confirmPasswordField.setWidthFull();
+        confirmPasswordField.setPlaceholder("••••••••");
+        confirmPasswordField.setRequired(true);
+        confirmPasswordField.getStyle().set("margin-bottom", "20px");
+        
+        Button registerButton = new Button("Crear Cuenta");
         registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         registerButton.setWidthFull();
         registerButton.getStyle()
-                .set("height", "45px")
-                .set("font-weight", "bold");
-
-        // Evento del botón registro
-        registerButton.addClickListener(e -> {
-            System.out.println("REGISTRO - Usuario: " + registerUsername.getValue());
-            System.out.println("REGISTRO - Email: " + registerEmail.getValue());
-            System.out.println("REGISTRO - Contraseña: " + registerPassword.getValue());
-            System.out.println("REGISTRO - Confirmar: " + confirmPassword.getValue());
+            .set("height", "45px")
+            .set("font-weight", "bold");
+        
+        // Eventos de prueba
+        registerButton.addClickListener(event -> {
+            System.out.println("REGISTER - Name: " + nameField.getValue());
+            System.out.println("REGISTER - Email: " + emailField.getValue());
+            System.out.println("REGISTER - Password: " + passwordField.getValue());
+            System.out.println("REGISTER - Confirm: " + confirmPasswordField.getValue());
+            showSuccessNotification("¡Cuenta creada exitosamente!");
         });
-
-        // Agregar componentes al formulario
-        registerForm.add(registerUsername, registerEmail, registerPassword, confirmPassword, registerButton);
+        
+        formLayout.add(nameField, emailField, passwordField, confirmPasswordField, registerButton);
+        return formLayout;
     }
 
-    private void showLoginForm() {
-        loginForm.setVisible(true);
-        registerForm.setVisible(false);
+    private Component createResetPasswordForm() {
+        FormLayout formLayout = new FormLayout();
+        formLayout.addClassName("auth-form");
+        
+        H2 resetTitle = new H2("Recuperar Contraseña");
+        resetTitle.addClassName("auth-title");
+        resetTitle.getStyle()
+            .set("text-align", "center")
+            .set("color", "#2c3e50")
+            .set("margin-bottom", "10px");
+        
+        Paragraph resetDescription = new Paragraph("Ingresa tu email para recibir un enlace de recuperación");
+        resetDescription.addClassName("auth-description");
+        resetDescription.getStyle()
+            .set("text-align", "center")
+            .set("color", "#7f8c8d")
+            .set("margin-bottom", "20px");
+        
+        EmailField emailField = new EmailField("Email");
+        emailField.setPrefixComponent(VaadinIcon.ENVELOPE.create());
+        emailField.setWidthFull();
+        emailField.setPlaceholder("tu@email.com");
+        emailField.setRequired(true);
+        emailField.getStyle().set("margin-bottom", "20px");
+        
+        Button sendLinkButton = new Button("Enviar Enlace");
+        sendLinkButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        sendLinkButton.setWidthFull();
+        sendLinkButton.getStyle()
+            .set("height", "45px")
+            .set("font-weight", "bold");
+        
+        Button backButton = new Button("Volver al inicio de sesión");
+        backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        backButton.setWidthFull();
+        backButton.getStyle().set("margin-top", "15px");
+        backButton.addClickListener(e -> showAuthTabs());
+        
+        // Eventos de prueba
+        sendLinkButton.addClickListener(event -> {
+            System.out.println("RESET - Email: " + emailField.getValue());
+            showSuccessNotification("Se ha enviado un enlace de recuperación a tu email.");
+            showAuthTabs();
+        });
+        
+        VerticalLayout header = new VerticalLayout(resetTitle, resetDescription);
+        header.setPadding(false);
+        header.setSpacing(false);
+        header.setAlignItems(Alignment.CENTER);
+        
+        formLayout.add(header, emailField, sendLinkButton, backButton);
+        return formLayout;
     }
 
-    private void showRegisterForm() {
+    private void updateContent() {
+        loginForm.setVisible(loginTab.isSelected());
+        registerForm.setVisible(registerTab.isSelected());
+    }
+
+    private void showResetPasswordForm() {
+        isResetPasswordVisible = true;
+        tabs.setVisible(false);
         loginForm.setVisible(false);
-        registerForm.setVisible(true);
+        registerForm.setVisible(false);
+        resetPasswordForm.setVisible(true);
+    }
+
+    private void showAuthTabs() {
+        isResetPasswordVisible = false;
+        tabs.setVisible(true);
+        resetPasswordForm.setVisible(false);
+        updateContent();
+    }
+
+    private void showSuccessNotification(String message) {
+        Notification notification = new Notification(message, 3000, Notification.Position.TOP_CENTER);
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.open();
+    }
+
+    private void showErrorNotification(String message) {
+        Notification notification = new Notification(message, 3000, Notification.Position.TOP_CENTER);
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.open();
     }
 }

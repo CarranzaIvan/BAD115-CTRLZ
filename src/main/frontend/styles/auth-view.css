@@ -1,0 +1,29 @@
+.auth-view {
+  background-color: var(--lumo-contrast-5pct);
+}
+
+.auth-card {
+  background-color: var(--lumo-base-color);
+  border-radius: var(--lumo-border-radius-l);
+  box-shadow: var(--lumo-box-shadow-s);
+  padding: var(--lumo-space-m);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: var(--lumo-font-size-xl);
+  text-align: center;
+}
+
+.auth-description {
+  margin-top: var(--lumo-space-xs);
+  margin-bottom: var(--lumo-space-m);
+  text-align: center;
+  color: var(--lumo-secondary-text-color);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--lumo-space-m);
+}
