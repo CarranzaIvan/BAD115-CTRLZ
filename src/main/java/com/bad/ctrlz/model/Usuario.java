@@ -50,6 +50,9 @@ public class Usuario implements Serializable {
     @Column(name = "apellido", nullable = false, length = 100)
     String apellido;
 
+    @Column(name = "intentos_fallidos", nullable = false)
+    int intentosFallidos = 0; // Intentos fallidos de inicio de sesión
+    
     @Column(name = "primer_ingreso", nullable = false)
     boolean primerIngreso; // Primer ingreso
 
@@ -65,7 +68,7 @@ public class Usuario implements Serializable {
     @Column(name = "credenciales_no_expiradas", nullable = false)
     boolean credentialNoExpired; // Si esta credenciales han vencido
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "usuario_rol", joinColumns = @JoinColumn(name = "id_usuario"), inverseJoinColumns = @JoinColumn(name = "id_rol"))
     Set<Rol> roles = new HashSet<>();
 
@@ -75,16 +78,16 @@ public class Usuario implements Serializable {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
-    public Usuario() {}
-
-    @PrePersist
-    protected void onCreate() {
-        fechaCreacion = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        fechaActualizacion = LocalDateTime.now();
+    public Usuario(){
+        // Constructor por defecto
+        this.fechaCreacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now();
+        this.primerIngreso = true;
+        this.enabled = true;
+        this.accountNoExpired = true;
+        this.accountLocked = false;
+        this.credentialNoExpired = true;
+        this.intentosFallidos = 0;
     }
 
     public String getCorreo() {
@@ -197,6 +200,34 @@ public class Usuario implements Serializable {
 
     public void setFechaActualizacion(LocalDateTime fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
+    }
+
+    public int getIntentosFallidos() {
+        return intentosFallidos;
+    }
+
+    public void setIntentosFallidos(int intentosFallidos) {
+        this.intentosFallidos = intentosFallidos;
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "idUsuario=" + idUsuario +
+                ", correo='" + correo + '\'' +
+                ", password='" + password + '\'' +
+                ", nombre='" + nombre + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", intentosFallidos=" + intentosFallidos +
+                ", primerIngreso=" + primerIngreso +
+                ", enabled=" + enabled +
+                ", accountNoExpired=" + accountNoExpired +
+                ", accountLocked=" + accountLocked +
+                ", credentialNoExpired=" + credentialNoExpired +
+                ", roles=" + roles +
+                ", fechaCreacion=" + fechaCreacion +
+                ", fechaActualizacion=" + fechaActualizacion +
+                '}';
     }
     
 }

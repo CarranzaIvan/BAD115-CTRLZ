@@ -13,7 +13,12 @@ public interface RolRepository extends JpaRepository <Rol, Integer>{
     @Query("SELECT r FROM Rol r WHERE r.nombreRol = 'ADMINISTRADOR'")
     Set<Rol> encontrarAdministrador();
 
+    // Obtener rol de usuario
+    @Query("SELECT r FROM Rol r WHERE r.nombreRol = 'USUARIO'")
+    Rol encontrarUsuario();
+
     @Query("SELECT r FROM Rol r WHERE r.idRol = :idRol")
     Set<Rol> encontrarRol(@Param("idRol") Integer idRol);
+    
 
 }
