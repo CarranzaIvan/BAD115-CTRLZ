@@ -19,4 +19,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     // Buscar usuario por correo
     @Query("SELECT u FROM Usuario u WHERE u.correo = :correo")
     Optional<Usuario> findByEmail(@Param("correo") String correo);
+
+    // Buscar existe usuario por correo
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.correo = :correo")
+    boolean existsByEmail(@Param("correo") String correo);
 }
