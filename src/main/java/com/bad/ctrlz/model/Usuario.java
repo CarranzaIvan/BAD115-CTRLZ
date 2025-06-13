@@ -1,7 +1,4 @@
 package com.bad.ctrlz.model;
-
-import jakarta.persistence.CascadeType;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,8 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

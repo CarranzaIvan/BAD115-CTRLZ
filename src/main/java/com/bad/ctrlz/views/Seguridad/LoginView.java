@@ -21,11 +21,14 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.data.validator.EmailValidator;
+
 
 @Route("login")
-@PageTitle("Autenticación")
+@PageTitle("Bienvenido | CtrlZ")
 @CssImport("./styles/auth-view.css")
 public class LoginView extends VerticalLayout {
 
@@ -202,13 +205,29 @@ public class LoginView extends VerticalLayout {
         FormLayout formLayout = new FormLayout(); // Layout para el formulario de registro
         formLayout.addClassName("auth-form"); // Clase CSS para estilos personalizados
 
+        // Crear Binder para validaciones
+        Binder<Usuario> binder = new Binder<>(Usuario.class);
+
         // Campo de nombre
         TextField nameField = new TextField("Nombre");
         nameField.setPrefixComponent(VaadinIcon.USER.create());
         nameField.setWidthFull();
         nameField.setPlaceholder("Ingrese su nombre");
         nameField.setRequired(true);
+        nameField.setMaxLength(100); // Límite de caracteres
         nameField.getStyle().set("margin-bottom", "15px");
+
+        // Validaciones para nombre
+        binder.forField(nameField)
+                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                        "El nombre es obligatorio")
+                .withValidator(value -> value.trim().length() >= 2,
+                        "El nombre debe tener al menos 2 caracteres")
+                .withValidator(value -> value.trim().length() <= 100,
+                        "El nombre no puede exceder 100 caracteres")
+                .withValidator(value -> value.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"),
+                        "El nombre solo puede contener letras y espacios")
+                .bind(Usuario::getNombre, Usuario::setNombre);
 
         // Campo de apellido
         TextField lastNameField = new TextField("Apellido");
@@ -216,7 +235,20 @@ public class LoginView extends VerticalLayout {
         lastNameField.setWidthFull();
         lastNameField.setPlaceholder("Ingrese su apellido");
         lastNameField.setRequired(true);
+        lastNameField.setMaxLength(100); // Límite de caracteres
         lastNameField.getStyle().set("margin-bottom", "15px");
+
+        // Validaciones para apellido
+        binder.forField(lastNameField)
+                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                        "El apellido es obligatorio")
+                .withValidator(value -> value.trim().length() >= 2,
+                        "El apellido debe tener al menos 2 caracteres")
+                .withValidator(value -> value.trim().length() <= 100,
+                        "El apellido no puede exceder 100 caracteres")
+                .withValidator(value -> value.matches("^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$"),
+                        "El apellido solo puede contener letras y espacios")
+                .bind(Usuario::getApellido, Usuario::setApellido);
 
         // Campo de email
         EmailField emailField = new EmailField("Email");
@@ -224,22 +256,83 @@ public class LoginView extends VerticalLayout {
         emailField.setWidthFull();
         emailField.setPlaceholder("tu@email.com");
         emailField.setRequired(true);
+        emailField.setMaxLength(150); // Límite de caracteres
         emailField.getStyle().set("margin-bottom", "15px");
 
-        // Campos de contraseña y confirmación
+        // Validaciones para email
+        binder.forField(emailField)
+                .withValidator(value -> value != null && !value.trim().isEmpty(),
+                        "El email es obligatorio")
+                .withValidator(new EmailValidator("El formato del email no es válido"))
+                .withValidator(value -> value.length() <= 150,
+                        "El email no puede exceder 150 caracteres")
+                .bind(Usuario::getCorreo, Usuario::setCorreo);
+
+        // Campo de contraseña
         PasswordField passwordField = new PasswordField("Contraseña");
         passwordField.setPrefixComponent(VaadinIcon.LOCK.create());
         passwordField.setWidthFull();
         passwordField.setPlaceholder("••••••••");
         passwordField.setRequired(true);
+        passwordField.setMaxLength(255); // Límite de caracteres
         passwordField.getStyle().set("margin-bottom", "15px");
 
+        // Validaciones para contraseña
+        binder.forField(passwordField)
+                .withValidator(value -> value != null && !value.isEmpty(),
+                        "La contraseña es obligatoria")
+                .withValidator(value -> value.length() >= 6,
+                        "La contraseña debe tener al menos 6 caracteres")
+                .withValidator(value -> value.length() <= 255,
+                        "La contraseña no puede exceder 255 caracteres")
+                .withValidator(value -> value.matches(".*[A-Z].*"),
+                        "La contraseña debe contener al menos una letra mayúscula")
+                .withValidator(value -> value.matches(".*[a-z].*"),
+                        "La contraseña debe contener al menos una letra minúscula")
+                .withValidator(value -> value.matches(".*\\d.*"),
+                        "La contraseña debe contener al menos un número")
+                .withValidator(value -> !value.contains(" "),
+                        "La contraseña no puede contener espacios")
+                .bind(Usuario::getPassword, Usuario::setPassword);
+
+        // Campo de confirmación de contraseña
         PasswordField confirmPasswordField = new PasswordField("Confirmar contraseña");
         confirmPasswordField.setPrefixComponent(VaadinIcon.LOCK.create());
         confirmPasswordField.setWidthFull();
         confirmPasswordField.setPlaceholder("••••••••");
         confirmPasswordField.setRequired(true);
+        confirmPasswordField.setMaxLength(255); // Límite de caracteres
         confirmPasswordField.getStyle().set("margin-bottom", "20px");
+
+        // Validación en tiempo real para confirmación de contraseña
+        confirmPasswordField.addValueChangeListener(event -> {
+            String password = passwordField.getValue();
+            String confirmPassword = event.getValue();
+
+            if (confirmPassword != null && !confirmPassword.isEmpty()) {
+                if (!password.equals(confirmPassword)) {
+                    confirmPasswordField.setErrorMessage("Las contraseñas no coinciden");
+                    confirmPasswordField.setInvalid(true);
+                } else {
+                    confirmPasswordField.setInvalid(false);
+                }
+            }
+        });
+
+        // También validar cuando cambie la contraseña principal
+        passwordField.addValueChangeListener(event -> {
+            String password = event.getValue();
+            String confirmPassword = confirmPasswordField.getValue();
+
+            if (confirmPassword != null && !confirmPassword.isEmpty()) {
+                if (!password.equals(confirmPassword)) {
+                    confirmPasswordField.setErrorMessage("Las contraseñas no coinciden");
+                    confirmPasswordField.setInvalid(true);
+                } else {
+                    confirmPasswordField.setInvalid(false);
+                }
+            }
+        });
 
         // Botón para crear cuenta
         Button registerButton = new Button("Crear Cuenta");
@@ -249,28 +342,71 @@ public class LoginView extends VerticalLayout {
                 .set("height", "45px")
                 .set("font-weight", "bold");
 
-        // Eventos de prueba
+        // Evento del botón con validaciones completas
         registerButton.addClickListener(event -> {
+            try {
+                // Validar campos individuales primero
+                if (!binder.validate().isOk()) {
+                    Notification.show("Por favor, corrija los errores en el formulario",
+                            3000, Notification.Position.TOP_CENTER);
+                    return;
+                }
 
-            // Aquí podrías agregar la lógica para guardar el usuario en la base de datos
-            if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
-                Notification.show("Las contraseñas no coinciden", 3000, Notification.Position.TOP_CENTER);
-                return;
-            }
+                // Validar que las contraseñas coincidan
+                if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
+                    confirmPasswordField.setErrorMessage("Las contraseñas no coinciden");
+                    confirmPasswordField.setInvalid(true);
+                    Notification.show("Las contraseñas no coinciden",
+                            3000, Notification.Position.TOP_CENTER);
+                    return;
+                }
 
-            Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setNombre(nameField.getValue());
-            nuevoUsuario.setApellido(lastNameField.getValue());
-            nuevoUsuario.setCorreo(emailField.getValue());
-            nuevoUsuario.setPassword(passwordField.getValue());
-            boolean registrado = usuarioService.guardarUsuario(nuevoUsuario);
-            if (registrado) {
-                showSuccessNotification("¡Cuenta creada exitosamente!");
-                // Opcional: limpiar formulario o redirigir
-            } else {
-                Notification.show("El email ya está registrado", 3000, Notification.Position.TOP_CENTER);
+                // Validar que la confirmación no esté vacía
+                if (confirmPasswordField.getValue() == null || confirmPasswordField.getValue().trim().isEmpty()) {
+                    confirmPasswordField.setErrorMessage("Debe confirmar la contraseña");
+                    confirmPasswordField.setInvalid(true);
+                    Notification.show("Debe confirmar la contraseña",
+                            3000, Notification.Position.TOP_CENTER);
+                    return;
+                }
+
+                // Crear y validar el usuario
+                Usuario nuevoUsuario = new Usuario();
+
+                // Usar el binder para poblar el objeto
+                if (binder.writeBeanIfValid(nuevoUsuario)) {
+                    // Limpiar espacios en blanco
+                    nuevoUsuario.setNombre(nuevoUsuario.getNombre().trim());
+                    nuevoUsuario.setApellido(nuevoUsuario.getApellido().trim());
+                    nuevoUsuario.setCorreo(nuevoUsuario.getCorreo().trim().toLowerCase());
+
+                    // Intentar guardar el usuario
+                    boolean registrado = usuarioService.guardarUsuario(nuevoUsuario);
+
+                    if (registrado) {
+                        showSuccessNotification("¡Cuenta creada exitosamente!");
+                        // Limpiar formulario
+                        binder.setBean(new Usuario());
+                        confirmPasswordField.clear();
+                    } else {
+                        Notification.show("El email ya está registrado",
+                                3000, Notification.Position.TOP_CENTER);
+                        emailField.focus();
+                    }
+                } else {
+                    Notification.show("Por favor, corrija los errores en el formulario",
+                            3000, Notification.Position.TOP_CENTER);
+                }
+
+            } catch (Exception e) {
+                Notification.show("Error al crear la cuenta. Intente nuevamente.",
+                        3000, Notification.Position.TOP_CENTER);
+                e.printStackTrace(); // Para debugging
             }
         });
+
+        // Configurar el bean inicial
+        binder.setBean(new Usuario());
 
         formLayout.add(nameField, lastNameField, emailField, passwordField, confirmPasswordField, registerButton);
         return formLayout;
