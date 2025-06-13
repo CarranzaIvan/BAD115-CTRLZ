@@ -102,7 +102,8 @@ public class DashboardEncuestasView extends VerticalLayout {
     }
 
     private void agregarPreguntas(Encuesta encuesta) {
-        Notification.show("Agregar preguntas a: " + encuesta.getTitulo());
+        Integer id = encuesta.getIdEncuesta(); 
+        getUI().ifPresent(ui -> ui.navigate( + id + "/preguntas"));
     }
 
     private void confirmarEliminar(Encuesta encuesta) {
