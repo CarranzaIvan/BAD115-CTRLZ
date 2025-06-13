@@ -32,3 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
+# Ignorar carpeta generated
+/src/main/frontend/generated/
+
+# Ignorar el archivo de configuración local
+/src/main/resources/application.properties
