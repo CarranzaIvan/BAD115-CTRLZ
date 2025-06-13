@@ -7,9 +7,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "tipo_pregunta")
+@Table(name = "tipo_pregunta", uniqueConstraints = @UniqueConstraint(columnNames = "nombre_tipo"))
 public class TipoPregunta {
 
     @Id
