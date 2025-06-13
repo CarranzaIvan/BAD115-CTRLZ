@@ -112,9 +112,8 @@ public class DashboardEncuestasView extends VerticalLayout {
         Button confirmar = new Button("Eliminar", e -> {
             encuestaService.eliminar(encuesta);
             confirmDialog.close();
-            removeAll();
-            cargarEncuestas();
             Notification.show("Encuesta eliminada correctamente", 3000, Notification.Position.TOP_CENTER);
+            getUI().ifPresent(ui -> ui.getPage().reload()); // Esto recarga la página completa
         });
 
         confirmar.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -124,4 +123,5 @@ public class DashboardEncuestasView extends VerticalLayout {
         confirmDialog.getFooter().add(confirmar, cancelar);
         confirmDialog.open();
     }
+
 }
