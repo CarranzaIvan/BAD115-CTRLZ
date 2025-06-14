@@ -217,6 +217,9 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             inicioEscala.clear();
             finEscala.clear();
             incremento.clear();
+            opcionesTemp.clear();  // limpiar la lista de opciones en memoria
+            seccionOpciones.removeAll();  // limpiar visualmente el layout
+
 
             // Ocultamos todo por defecto
             comboCerradaEleccionUnicaTipo.setVisible(false);
@@ -225,6 +228,10 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             inicioEscala.setVisible(false);
             finEscala.setVisible(false);
             incremento.setVisible(false);
+
+            //Cargamos nuevamente la seccion de opciones
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            seccionOpciones.add(nuevaSeccion);
 
             // Ahora evaluamos cada sección
             if ("Elección única".equals(valor)) {
@@ -255,6 +262,12 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             validacion.clear();
             validacion.setVisible(false);
             opcionesTemp.clear();
+            seccionOpciones.removeAll();
+
+
+            //Cargamos nuevamente la seccion de opciones
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            seccionOpciones.add(nuevaSeccion);
 
             // Activar campos según selección
             if ("Dicotómica".equals(valor)) {
