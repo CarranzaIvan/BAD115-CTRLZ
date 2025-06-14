@@ -195,7 +195,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 comboCerradaTipo.setVisible(false);
                 seccionOpciones.setVisible(false);
             }
-
+            comboCerradaTipo.clear();
             comboCerradaEleccionUnicaTipo.setVisible(false);
             comboCerradaEscalaTipo.setVisible(false);
             validacion.setVisible(false);
@@ -205,6 +205,9 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         });
 
         comboCerradaTipo.addValueChangeListener(event -> {
+            comboCerradaEleccionUnicaTipo.clear();
+            comboCerradaEscalaTipo.clear();
+            
             String valor = event.getValue();
 
             // Primero limpiamos todo
