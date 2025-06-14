@@ -1,6 +1,7 @@
 package com.bad.ctrlz.views.Preguntas;
 
 import com.bad.ctrlz.model.Encuesta;
+import com.bad.ctrlz.model.Opcion;
 import com.bad.ctrlz.model.Pregunta;
 import com.bad.ctrlz.model.TipoPregunta;
 import com.bad.ctrlz.service.EncuestaService;
@@ -28,6 +29,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -133,6 +135,11 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva Pregunta");
 
+        //Creamos el objeto de seccionOpciones
+        List<Opcion> opcionesTemp = new ArrayList<>();
+        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp);
+        seccionOpciones.setVisible(false);
+
         // Obtenemos de la base sólo los tipos permitidos
         List<String> nombresPermitidos = Arrays.asList("Abiertas", "Cerradas", "Mixtas");
         List<TipoPregunta> tiposPermitidos = tipoPreguntaService.listarTodos().stream()
@@ -186,6 +193,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 comboCerradaTipo.setVisible(true);
             } else {
                 comboCerradaTipo.setVisible(false);
+                seccionOpciones.setVisible(false);
             }
 
             comboCerradaEleccionUnicaTipo.setVisible(false);
@@ -218,18 +226,22 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             // Ahora evaluamos cada sección
             if ("Elección única".equals(valor)) {
                 comboCerradaEleccionUnicaTipo.setVisible(true);
+
             }
 
             if ("Elección múltiple".equals(valor)) {
                 // Aquí irán los campos para Elección múltiple en el futuro
+                seccionOpciones.setVisible(true);
             }
 
             if ("Ranking".equals(valor)) {
                 // Aquí irán los campos para Ranking en el futuro
+                seccionOpciones.setVisible(true);
             }
 
             if ("Escala".equals(valor)) {
                 comboCerradaEscalaTipo.setVisible(true);
+                seccionOpciones.setVisible(false);
             }
         });
 
@@ -239,14 +251,17 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             // Siempre limpiar y ocultar primero
             validacion.clear();
             validacion.setVisible(false);
+            opcionesTemp.clear();
 
             // Activar campos según selección
             if ("Dicotómica".equals(valor)) {
                 validacion.setVisible(true);
+                seccionOpciones.setVisible(true);
             }
 
             if ("Politómica".equals(valor)) {
                 // Aquí podrías agregar futuros campos para Politómica
+                seccionOpciones.setVisible(true);
             }
         });
 
@@ -288,7 +303,8 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 validacion,
                 inicioEscala,
                 finEscala,
-                incremento);
+                incremento,
+                seccionOpciones);
 
         Button guardar = new Button("Guardar", e -> {
             if (comboTipo.isEmpty() || textoPregunta.isEmpty()) {
@@ -597,4 +613,53 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         dialog.add(formulario);
         dialog.open();
     }
+
+
+    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp) {
+        Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
+        gridOpciones.setHeight("200px");
+        
+        gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto").setAutoWidth(true);
+        gridOpciones.addColumn(Opcion::getOrden).setHeader("Correlativo").setAutoWidth(true);
+        gridOpciones.addComponentColumn(opcion -> {
+            Button eliminar = new Button(new Icon("lumo", "cross"));
+            eliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+            eliminar.addClickListener(ev -> {
+                opcionesTemp.remove(opcion);
+                for (int i = 0; i < opcionesTemp.size(); i++) {
+                    opcionesTemp.get(i).setOrden(i + 1);
+                }
+                gridOpciones.setItems(opcionesTemp);
+            });
+            return eliminar;
+        }).setHeader("Acciones");
+
+        TextField textoOpcion = new TextField("Texto de opción");
+        NumberField orden = new NumberField("Correlativo");
+        orden.setStep(1);
+        orden.setValue(0.0);
+        orden.setMin(0);
+
+        Button btnAgregarOpcion = new Button("Agregar Opción", e -> {
+            if (textoOpcion.isEmpty()) {
+                Notification.show("Ingrese texto de opción");
+                return;
+            }
+            Opcion nueva = new Opcion();
+            nueva.setTextoOpcion(textoOpcion.getValue());
+            nueva.setOrden(orden.getValue().intValue());
+            nueva.setOrden(opcionesTemp.size() + 1);
+            opcionesTemp.add(nueva);
+            gridOpciones.setItems(opcionesTemp);
+            textoOpcion.clear();
+            orden.setValue(0.0);
+        });
+
+        VerticalLayout seccion = new VerticalLayout(textoOpcion, orden, btnAgregarOpcion, gridOpciones);
+        seccion.setPadding(false);
+        seccion.setSpacing(false);
+        seccion.getStyle().set("border", "1px solid #ddd").set("padding", "10px");
+        return seccion;
+    }
+
 }
