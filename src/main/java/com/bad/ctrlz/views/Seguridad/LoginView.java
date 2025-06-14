@@ -47,13 +47,23 @@ public class LoginView extends VerticalLayout {
         private boolean isResetPasswordVisible = false; // Bandera para controlar la visibilidad del formulario de
                                                         // recuperación de contraseña
 
+        // Header dinámico que cambia según la vista
+        private VerticalLayout dynamicHeader;
+        private H2 mainTitle;
+        private Paragraph mainDescription;
+
         // Constructor de la vista
         public LoginView() {
                 addClassName("auth-view");
                 addClassName("gradient-background"); // Nueva clase para el fondo
                 setSizeFull();
+                setMinHeight("100vh"); // Asegurar altura mínima completa
                 setAlignItems(Alignment.CENTER);
                 setJustifyContentMode(JustifyContentMode.CENTER);
+                
+                // Configurar el scroll y expansión automática
+                getStyle().set("overflow-y", "auto");
+                getStyle().set("min-height", "100vh");
 
                 Div card = createCard(); // Crea el contenedor principal de la tarjeta
                 card.addClassName("auth-card"); // Clase CSS para la tarjeta
@@ -69,46 +79,66 @@ public class LoginView extends VerticalLayout {
                 Div card = new Div(); // Contenedor principal de la tarjeta
                 card.addClassName("auth-card"); // Clase CSS para estilos personalizados
                 card.setWidth("400px"); // Ancho fijo de la tarjeta
+                card.setMaxWidth("90vw"); // Responsivo en móviles
                 card.getStyle()
                                 .set("padding", "30px")
                                 .set("border-radius", "10px")
                                 .set("box-shadow", "0 4px 12px rgba(0,0,0,0.15)")
-                                .set("background-color", "white");
+                                .set("background-color", "white")
+                                .set("margin", "20px auto") // Margen superior e inferior
+                                .set("max-height", "90vh") // Altura máxima
+                                .set("overflow-y", "auto"); // Scroll interno si es necesario
 
-                // Crear título y descripción
-                H2 title = new H2("Bienvenido");
-                title.addClassName("auth-title");
-                title.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#2c3e50")
-                                .set("margin-bottom", "10px");
-
-                // Descripción debajo del título
-                Paragraph description = new Paragraph("Inicia sesión o crea una nueva cuenta");
-                description.addClassName("auth-description");
-                description.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#7f8c8d")
-                                .set("margin-bottom", "20px");
-
-                // Contenedor para el título y descripción
-                VerticalLayout header = new VerticalLayout(title, description);
-                header.setPadding(false);
-                header.setSpacing(false);
-                header.setAlignItems(Alignment.CENTER);
+                // Crear header dinámico
+                createDynamicHeader();
 
                 // Crear pestañas y contenido
                 createTabs();
                 createForms();
 
                 // Configurar la pestaña de inicio de sesión como seleccionada por defecto
-                VerticalLayout content = new VerticalLayout(header, tabs, pages); // Contenido principal de la tarjeta
+                VerticalLayout content = new VerticalLayout(dynamicHeader, tabs, pages); // Contenido principal de la tarjeta
                 content.setPadding(true); // Espaciado interno
                 content.setSpacing(true); // Espaciado entre componentes
                 content.setAlignItems(Alignment.STRETCH); // Alinea los componentes al inicio
 
                 card.add(content); // Agrega es contenido a la tarjeta
                 return card;
+        }
+
+        /**
+         * Crea el header dinámico que cambia según la vista activa
+         */
+        private void createDynamicHeader() {
+                // Crear título y descripción principales
+                mainTitle = new H2("Bienvenido");
+                mainTitle.addClassName("auth-title");
+                mainTitle.getStyle()
+                                .set("text-align", "center")
+                                .set("color", "#2c3e50")
+                                .set("margin-bottom", "10px");
+
+                // Descripción debajo del título
+                mainDescription = new Paragraph("Inicia sesión o crea una nueva cuenta");
+                mainDescription.addClassName("auth-description");
+                mainDescription.getStyle()
+                                .set("text-align", "center")
+                                .set("color", "#7f8c8d")
+                                .set("margin-bottom", "20px");
+
+                // Contenedor para el título y descripción
+                dynamicHeader = new VerticalLayout(mainTitle, mainDescription);
+                dynamicHeader.setPadding(false);
+                dynamicHeader.setSpacing(false);
+                dynamicHeader.setAlignItems(Alignment.CENTER);
+        }
+
+        /**
+         * Actualiza el header según la vista activa
+         */
+        private void updateHeader(String title, String description) {
+                mainTitle.setText(title);
+                mainDescription.setText(description);
         }
 
         // Método para crear las pestañas de inicio de sesión y registro
@@ -215,28 +245,6 @@ public class LoginView extends VerticalLayout {
                 // Crear Binder para validaciones
                 Binder<Usuario> binder = new Binder<>(Usuario.class);
 
-                // ========== AGREGAR TÍTULO Y DESCRIPCIÓN ==========
-                H2 registerTitle = new H2("Crear Cuenta");
-                registerTitle.addClassName("auth-title");
-                registerTitle.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#2c3e50")
-                                .set("margin-bottom", "10px");
-
-                Paragraph registerDescription = new Paragraph("Completa los datos para crear tu nueva cuenta");
-                registerDescription.addClassName("auth-description");
-                registerDescription.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#7f8c8d")
-                                .set("margin-bottom", "20px");
-
-                // Crear header para título y descripción
-                VerticalLayout header = new VerticalLayout(registerTitle, registerDescription);
-                header.setPadding(false);
-                header.setSpacing(false);
-                header.setAlignItems(Alignment.CENTER);
-                // ===================================================
-
                 // Campo de nombre
                 TextField nameField = new TextField("Nombre");
                 nameField.setPrefixComponent(VaadinIcon.USER.create());
@@ -288,10 +296,9 @@ public class LoginView extends VerticalLayout {
                 emailField.setMaxLength(150);
                 emailField.getStyle().set("margin-bottom", "15px");
 
-                // Validaciones para email
+                // Validaciones para email - CORREGIDAS
                 binder.forField(emailField)
-                                .withValidator(value -> value != null && !value.trim().isEmpty(),
-                                                "El email es obligatorio")
+                                .asRequired("El email es obligatorio")
                                 .withValidator(new EmailValidator("El formato del email no es válido"))
                                 .withValidator(value -> value.length() <= 150,
                                                 "El email no puede exceder 150 caracteres")
@@ -308,8 +315,7 @@ public class LoginView extends VerticalLayout {
 
                 // Validaciones para contraseña
                 binder.forField(passwordField)
-                                .withValidator(value -> value != null && !value.isEmpty(),
-                                                "La contraseña es obligatoria")
+                                .asRequired("La contraseña es obligatoria")
                                 .withValidator(value -> value.length() >= 6,
                                                 "La contraseña debe tener al menos 6 caracteres")
                                 .withValidator(value -> value.length() <= 255,
@@ -365,7 +371,7 @@ public class LoginView extends VerticalLayout {
 
                 // Botón para crear cuenta
                 Button registerButton = new Button("Crear Cuenta");
-                registerButton.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+                registerButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY); // Cambiado a azul
                 registerButton.setWidthFull();
                 registerButton.getStyle()
                                 .set("height", "45px")
@@ -376,8 +382,7 @@ public class LoginView extends VerticalLayout {
                         try {
                                 // Validar campos individuales primero
                                 if (!binder.validate().isOk()) {
-                                        Notification.show("Por favor, corrija los errores en el formulario",
-                                                        3000, Notification.Position.TOP_CENTER);
+                                        showErrorNotification("Por favor, corrija los errores en el formulario");
                                         return;
                                 }
 
@@ -385,8 +390,7 @@ public class LoginView extends VerticalLayout {
                                 if (!passwordField.getValue().equals(confirmPasswordField.getValue())) {
                                         confirmPasswordField.setErrorMessage("Las contraseñas no coinciden");
                                         confirmPasswordField.setInvalid(true);
-                                        Notification.show("Las contraseñas no coinciden",
-                                                        3000, Notification.Position.TOP_CENTER);
+                                        showErrorNotification("Las contraseñas no coinciden");
                                         return;
                                 }
 
@@ -395,8 +399,7 @@ public class LoginView extends VerticalLayout {
                                                 || confirmPasswordField.getValue().trim().isEmpty()) {
                                         confirmPasswordField.setErrorMessage("Debe confirmar la contraseña");
                                         confirmPasswordField.setInvalid(true);
-                                        Notification.show("Debe confirmar la contraseña",
-                                                        3000, Notification.Position.TOP_CENTER);
+                                        showErrorNotification("Debe confirmar la contraseña");
                                         return;
                                 }
 
@@ -418,19 +421,18 @@ public class LoginView extends VerticalLayout {
                                                 // Limpiar formulario
                                                 binder.setBean(new Usuario());
                                                 confirmPasswordField.clear();
+                                                // Cambiar a la pestaña de login
+                                                tabs.setSelectedTab(loginTab);
                                         } else {
-                                                Notification.show("El email ya está registrado",
-                                                                3000, Notification.Position.TOP_CENTER);
+                                                showErrorNotification("El email ya está registrado");
                                                 emailField.focus();
                                         }
                                 } else {
-                                        Notification.show("Por favor, corrija los errores en el formulario",
-                                                        3000, Notification.Position.TOP_CENTER);
+                                        showErrorNotification("Por favor, corrija los errores en el formulario");
                                 }
 
                         } catch (Exception e) {
-                                Notification.show("Error al crear la cuenta. Intente nuevamente.",
-                                                3000, Notification.Position.TOP_CENTER);
+                                showErrorNotification("Error al crear la cuenta. Intente nuevamente.");
                                 e.printStackTrace(); // Para debugging
                         }
                 });
@@ -438,8 +440,7 @@ public class LoginView extends VerticalLayout {
                 // Configurar el bean inicial
                 binder.setBean(new Usuario());
 
-                // ========== IMPORTANTE: AGREGAR EL HEADER AL INICIO ==========
-                formLayout.add(header, nameField, lastNameField, emailField, passwordField, confirmPasswordField,
+                formLayout.add(nameField, lastNameField, emailField, passwordField, confirmPasswordField,
                                 registerButton);
 
                 return formLayout;
@@ -452,20 +453,6 @@ public class LoginView extends VerticalLayout {
                 // Crear Binder para validaciones
                 Binder<Usuario> binder = new Binder<>(Usuario.class);
 
-                H2 resetTitle = new H2("Recuperar Contraseña");
-                resetTitle.addClassName("auth-title");
-                resetTitle.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#2c3e50")
-                                .set("margin-bottom", "10px");
-
-                Paragraph resetDescription = new Paragraph("Ingresa tu email para recibir un enlace de recuperación");
-                resetDescription.addClassName("auth-description");
-                resetDescription.getStyle()
-                                .set("text-align", "center")
-                                .set("color", "#7f8c8d")
-                                .set("margin-bottom", "20px");
-
                 EmailField emailField = new EmailField("Email");
                 emailField.setPrefixComponent(VaadinIcon.ENVELOPE.create());
                 emailField.setWidthFull();
@@ -473,10 +460,9 @@ public class LoginView extends VerticalLayout {
                 emailField.setRequired(true);
                 emailField.getStyle().set("margin-bottom", "20px");
 
-                // Validaciones para email en el formulario de recuperación
+                // Validaciones para email en el formulario de recuperación - CORREGIDAS
                 binder.forField(emailField)
-                                .withValidator(value -> value != null && !value.trim().isEmpty(),
-                                                "El email es obligatorio")
+                                .asRequired("El email es obligatorio")
                                 .withValidator(new EmailValidator("El formato del email no es válido"))
                                 .withValidator(value -> value.length() <= 150,
                                                 "El email no puede exceder 150 caracteres")
@@ -495,18 +481,15 @@ public class LoginView extends VerticalLayout {
                 backButton.getStyle().set("margin-top", "15px");
                 backButton.addClickListener(e -> showAuthTabs());
 
-                // Eventos de prueba
+                // Eventos con validaciones corregidas
                 sendLinkButton.addClickListener(event -> {
-                        // Aquí se simula el envío del enlace de recuperación
-                        String email = emailField.getValue();
-                        if (email == null || email.isEmpty()) {
-                                emailField.setErrorMessage("El email es obligatorio");
-                                emailField.setInvalid(true);
-                                Notification.show("Por favor, ingresa un email válido",
-                                                3000, Notification.Position.TOP_CENTER);
+                        // Validar usando el binder
+                        if (!binder.validate().isOk()) {
+                                showErrorNotification("Por favor, ingresa un email válido");
                                 return;
                         }
 
+                        String email = emailField.getValue();
                         Boolean emailValid = usuarioService.validarEmail(email);
                         if (!emailValid) {
                                 showErrorNotification("El email no está registrado");
@@ -519,22 +502,28 @@ public class LoginView extends VerticalLayout {
                         showAuthTabs();
                 });
 
-                VerticalLayout header = new VerticalLayout(resetTitle, resetDescription);
-                header.setPadding(false);
-                header.setSpacing(false);
-                header.setAlignItems(Alignment.CENTER);
+                // Configurar el bean inicial para el binder
+                binder.setBean(new Usuario());
 
-                formLayout.add(header, emailField, sendLinkButton, backButton);
+                formLayout.add(emailField, sendLinkButton, backButton);
                 return formLayout;
         }
 
         private void updateContent() {
-                loginForm.setVisible(loginTab.isSelected());
-                registerForm.setVisible(registerTab.isSelected());
+                if (loginTab.isSelected()) {
+                        updateHeader("Bienvenido", "Inicia sesión con tu cuenta");
+                        loginForm.setVisible(true);
+                        registerForm.setVisible(false);
+                } else if (registerTab.isSelected()) {
+                        updateHeader("Crear Cuenta", "Completa los datos para crear tu nueva cuenta");
+                        loginForm.setVisible(false);
+                        registerForm.setVisible(true);
+                }
         }
 
         private void showResetPasswordForm() {
                 isResetPasswordVisible = true;
+                updateHeader("Recuperar Contraseña", "Ingresa tu email para recibir un enlace de recuperación");
                 tabs.setVisible(false);
                 loginForm.setVisible(false);
                 registerForm.setVisible(false);
