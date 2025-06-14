@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -56,9 +57,9 @@ public class DashboardEncuestasView extends VerticalLayout {
     private Div crearCard(Encuesta encuesta) {
         Div card = new Div();
         card.getStyle().set("padding", "20px").set("margin-bottom", "20px")
-            .set("border-radius", "10px").set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
-            .set("background-color", "#FFFFFF").set("width", "80%")
-            .set("max-width", "800px").set("margin-left", "auto").set("margin-right", "auto");
+                .set("border-radius", "10px").set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
+                .set("background-color", "#FFFFFF").set("width", "80%")
+                .set("max-width", "800px").set("margin-left", "auto").set("margin-right", "auto");
 
         Span titulo = new Span("Título: " + encuesta.getTitulo());
         Span objetivo = new Span("Objetivo: " + encuesta.getObjetivo());
@@ -97,7 +98,7 @@ public class DashboardEncuestasView extends VerticalLayout {
     }
 
     private void agregarPreguntas(Encuesta encuesta) {
-        Integer id = encuesta.getIdEncuesta(); 
+        Integer id = encuesta.getIdEncuesta();
         getUI().ifPresent(ui -> ui.navigate(id + "/preguntas"));
     }
 
@@ -134,15 +135,46 @@ public class DashboardEncuestasView extends VerticalLayout {
             mostrarDialogoLink(baseUrl + nuevoLink);
         }
     }
+
     private void mostrarDialogoLink(String link) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Link generado");
-        dialog.add(new Span("Este es el link de acceso público:"));
-        dialog.add(new Span(link));
+
+        Span label = new Span("Este es el link de acceso público:");
+        TextField linkField = new TextField();
+        linkField.setValue(link);
+        linkField.setReadOnly(true);
+        linkField.setWidthFull();
+
+        Button copiarBtn = new Button("Copiar");
+        copiarBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        copiarBtn.addClickListener(e -> {
+            linkField.getElement().executeJs(
+                    "navigator.clipboard.writeText($0).then(function() {" +
+                            "  $1.$server.copied();" +
+                            "});",
+                    linkField.getValue(), copiarBtn);
+        });
+
+        // Agregamos feedback visual en el servidor (opcional)
+        copiarBtn.getElement().setProperty("serverOnly", true);
+        copiarBtn.getElement().addPropertyChangeListener("copied", e -> {
+            copiarBtn.setText("¡Copiado!");
+        });
+
+        // Alternativamente, mucho más simple:
+        copiarBtn.addClickListener(e -> {
+            linkField.getElement().executeJs("navigator.clipboard.writeText($0);", linkField.getValue());
+            copiarBtn.setText("¡Copiado!");
+        });
 
         Button cerrar = new Button("Cerrar", e -> dialog.close());
         cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        dialog.getFooter().add(cerrar);
+
+        HorizontalLayout botones = new HorizontalLayout(copiarBtn, cerrar);
+        botones.setSpacing(true);
+
+        dialog.add(label, linkField, botones);
         dialog.open();
     }
 }
