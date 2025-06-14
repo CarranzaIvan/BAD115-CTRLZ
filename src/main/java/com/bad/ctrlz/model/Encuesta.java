@@ -1,4 +1,3 @@
-// Encuesta.java
 package com.bad.ctrlz.model;
 
 import jakarta.persistence.Column;
@@ -12,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,6 +35,10 @@ public class Encuesta {
     @Column(name = "estado", nullable = false, length = 1)
     private String estado = "A";
 
+    // 🔥 NUEVA COLUMNA AQUI:
+    @Column(name = "link_publico", unique = true, length = 100)
+    private String linkPublico;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
@@ -54,6 +56,8 @@ public class Encuesta {
         this.estado     = estado;
         this.usuario    = usuario;
     }
+
+    // Getters y Setters
 
     public Integer getIdEncuesta() {
         return idEncuesta;
@@ -109,5 +113,13 @@ public class Encuesta {
 
     public void setPreguntas(Set<Pregunta> preguntas) {
         this.preguntas = preguntas;
+    }
+
+    public String getLinkPublico() {
+        return linkPublico;
+    }
+
+    public void setLinkPublico(String linkPublico) {
+        this.linkPublico = linkPublico;
     }
 }
