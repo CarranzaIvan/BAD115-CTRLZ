@@ -16,4 +16,12 @@ public class TipoPreguntaService {
     public List<TipoPregunta> listarTodos() {
     return tipoPreguntaRepository.findAll();
     }
+
+    public TipoPregunta buscarPorNombre(String nombre) {
+    return tipoPreguntaRepository.findByNombreTipo(nombre);
+    }
+
+    public TipoPregunta buscarPorId(Integer id) {
+        return tipoPreguntaRepository.findById(id).orElse(null);
+    }
 }
