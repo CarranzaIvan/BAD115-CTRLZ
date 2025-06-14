@@ -1,6 +1,7 @@
 package com.bad.ctrlz.views.Preguntas;
 
 import com.bad.ctrlz.model.Encuesta;
+import com.bad.ctrlz.model.Opcion;
 import com.bad.ctrlz.model.Pregunta;
 import com.bad.ctrlz.model.TipoPregunta;
 import com.bad.ctrlz.service.EncuestaService;
@@ -27,8 +28,9 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
-
-
+import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Route(value = ":idEncuesta/preguntas", layout = MainLayout.class)
@@ -43,8 +45,8 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     private Integer idEncuesta;
 
     public CrearPregunta(PreguntaService preguntaService,
-                         EncuestaService encuestaService,
-                         TipoPreguntaService tipoPreguntaService) {
+            EncuestaService encuestaService,
+            TipoPreguntaService tipoPreguntaService) {
         this.preguntaService = preguntaService;
         this.encuestaService = encuestaService;
         this.tipoPreguntaService = tipoPreguntaService;
@@ -56,59 +58,59 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         H2 titulo = new H2("Preguntas de la Encuesta");
         add(titulo);
 
-            // Contenedor centrado y con ancho limitado
-    Div contenedor = new Div();
-    contenedor.getStyle().set("max-width", "900px");
-    contenedor.getStyle().set("margin", "0 auto");
-    contenedor.getStyle().set("padding", "1rem");
+        // Contenedor centrado y con ancho limitado
+        Div contenedor = new Div();
+        contenedor.getStyle().set("max-width", "900px");
+        contenedor.getStyle().set("margin", "0 auto");
+        contenedor.getStyle().set("padding", "1rem");
 
-    // Configuración del grid
-    grid = new Grid<>(Pregunta.class, false);
-    grid.setWidthFull();
-    grid.addColumn(Pregunta::getIdPregunta).setHeader("ID").setAutoWidth(true);
-    grid.addColumn(p -> {
-        TipoPregunta tipo = p.getTipoPregunta();
-        return tipo != null ? tipo.getNombreTipo() : "(sin tipo)";
-    }).setHeader("Tipo").setAutoWidth(true);
-    grid.addColumn(Pregunta::getTextoPregunta).setHeader("Texto").setFlexGrow(1);
-    grid.addColumn(p -> p.getObligatorio().equalsIgnoreCase("S") ? "Sí" : "No")
-        .setHeader("Obligatoria").setAutoWidth(true);
+        // Configuración del grid
+        grid = new Grid<>(Pregunta.class, false);
+        grid.setWidthFull();
+        grid.addColumn(Pregunta::getIdPregunta).setHeader("ID").setAutoWidth(true);
+        grid.addColumn(p -> {
+            TipoPregunta tipo = p.getTipoPregunta();
+            return tipo != null ? tipo.getNombreTipo() : "(sin tipo)";
+        }).setHeader("Tipo").setAutoWidth(true);
+        grid.addColumn(Pregunta::getTextoPregunta).setHeader("Texto").setFlexGrow(1);
+        grid.addColumn(p -> p.getObligatorio().equalsIgnoreCase("S") ? "Sí" : "No")
+                .setHeader("Obligatoria").setAutoWidth(true);
 
-    // Columna de acciones
-    grid.addComponentColumn(pregunta -> {
-        HorizontalLayout acciones = new HorizontalLayout();
-        acciones.setSpacing(true);
-        
-        Button btnVer = new Button(new Icon("lumo", "search"));
-        btnVer.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY);
-        btnVer.getElement().setProperty("title", "Ver");
-        btnVer.addClickListener(e -> mostrarDetallePregunta(pregunta));
-            
-        Button btnEditar = new Button(new Icon("lumo", "edit"));
-        btnEditar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
-        btnEditar.getElement().setProperty("title", "Editar");
-        btnEditar.addClickListener(e -> mostrarFormularioEditar(pregunta));
+        // Columna de acciones
+        grid.addComponentColumn(pregunta -> {
+            HorizontalLayout acciones = new HorizontalLayout();
+            acciones.setSpacing(true);
 
-        Button btnEliminar = new Button(new Icon("lumo", "cross"));
-        btnEliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
-        btnEliminar.getElement().setProperty("title", "Eliminar");
-        btnEliminar.addClickListener(e -> confirmarEliminar(pregunta));
+            Button btnVer = new Button(new Icon("lumo", "search"));
+            btnVer.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY);
+            btnVer.getElement().setProperty("title", "Ver");
+            btnVer.addClickListener(e -> mostrarDetallePregunta(pregunta));
 
-        acciones.add(btnVer,btnEditar, btnEliminar);
-        return acciones;
-    }).setHeader("Acciones").setAutoWidth(true);
+            Button btnEditar = new Button(new Icon("lumo", "edit"));
+            btnEditar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+            btnEditar.getElement().setProperty("title", "Editar");
+            btnEditar.addClickListener(e -> mostrarFormularioEditar(pregunta));
 
-    contenedor.add(grid);
-    contenedor.setWidthFull();
-    contenedor.setHeight("auto");
+            Button btnEliminar = new Button(new Icon("lumo", "cross"));
+            btnEliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+            btnEliminar.getElement().setProperty("title", "Eliminar");
+            btnEliminar.addClickListener(e -> confirmarEliminar(pregunta));
 
-    add(contenedor);
+            acciones.add(btnVer, btnEditar, btnEliminar);
+            return acciones;
+        }).setHeader("Acciones").setAutoWidth(true);
 
-    // Botón agregar
-    Button btnAgregar = new Button("Agregar Pregunta", e -> mostrarFormulario());
-    btnAgregar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-    btnAgregar.getStyle().set("margin", "1rem auto 0 auto");
-    add(btnAgregar);
+        contenedor.add(grid);
+        contenedor.setWidthFull();
+        contenedor.setHeight("auto");
+
+        add(contenedor);
+
+        // Botón agregar
+        Button btnAgregar = new Button("Agregar Pregunta", e -> mostrarFormulario());
+        btnAgregar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        btnAgregar.getStyle().set("margin", "1rem auto 0 auto");
+        add(btnAgregar);
     }
 
     @Override
@@ -133,32 +135,192 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva Pregunta");
 
+        //Creamos el objeto de seccionOpciones
+        List<Opcion> opcionesTemp = new ArrayList<>();
+        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp);
+        seccionOpciones.setVisible(false);
+
+        // Obtenemos de la base sólo los tipos permitidos
+        List<String> nombresPermitidos = Arrays.asList("Abiertas", "Cerradas", "Mixtas");
+        List<TipoPregunta> tiposPermitidos = tipoPreguntaService.listarTodos().stream()
+                .filter(tp -> nombresPermitidos.contains(tp.getNombreTipo()))
+                .toList(); // o .collect(Collectors.toList());
+
         ComboBox<TipoPregunta> comboTipo = new ComboBox<>("Tipo de Pregunta");
-        comboTipo.setItems(tipoPreguntaService.listarTodos());
+        comboTipo.setItems(tiposPermitidos);
         comboTipo.setItemLabelGenerator(TipoPregunta::getNombreTipo);
         comboTipo.setWidthFull();
 
+        // SEGUNDO NIVEL
+        ComboBox<String> comboCerradaTipo = new ComboBox<>("Cerrada tipo:");
+        comboCerradaTipo.setItems("Elección única", "Elección múltiple", "Ranking", "Escala");
+        comboCerradaTipo.setWidthFull();
+        comboCerradaTipo.setVisible(false);
+
+        // TERCER NIVEL
+        ComboBox<String> comboCerradaEleccionUnicaTipo = new ComboBox<>("Elección única tipo:");
+        comboCerradaEleccionUnicaTipo.setItems("Dicotómica", "Politómica");
+        comboCerradaEleccionUnicaTipo.setWidthFull();
+        comboCerradaEleccionUnicaTipo.setVisible(false);
+
+        // CUARTO NIVEL
+        ComboBox<String> comboCerradaEscalaTipo = new ComboBox<>("Escala tipo:");
+        comboCerradaEscalaTipo.setItems("Numérica", "Nominal", "Likert");
+        comboCerradaEscalaTipo.setWidthFull();
+        comboCerradaEscalaTipo.setVisible(false);
+
+        // CAMPOS COMUNES
         TextArea textoPregunta = new TextArea("Texto de la Pregunta");
         textoPregunta.setWidthFull();
         textoPregunta.setMaxLength(1000);
 
         Checkbox chkObligatoria = new Checkbox("¿Es obligatoria?");
-
         TextField validacion = new TextField("Regla de Validación");
-
         NumberField inicioEscala = new NumberField("Valor inicio escala");
         NumberField finEscala = new NumberField("Valor fin escala");
         NumberField incremento = new NumberField("Incremento escala");
 
+        validacion.setVisible(false);
+        inicioEscala.setVisible(false);
+        finEscala.setVisible(false);
+        incremento.setVisible(false);
+
+        // Lógica de habilitación en cascada
+        comboTipo.addValueChangeListener(event -> {
+            TipoPregunta valor = event.getValue();
+
+            if (valor != null && "Cerradas".equals(valor.getNombreTipo())) {
+                comboCerradaTipo.setVisible(true);
+            } else {
+                comboCerradaTipo.setVisible(false);
+                seccionOpciones.setVisible(false);
+            }
+            comboCerradaTipo.clear();
+            comboCerradaEleccionUnicaTipo.setVisible(false);
+            comboCerradaEscalaTipo.setVisible(false);
+            validacion.setVisible(false);
+            inicioEscala.setVisible(false);
+            finEscala.setVisible(false);
+            incremento.setVisible(false);
+        });
+
+        comboCerradaTipo.addValueChangeListener(event -> {
+            comboCerradaEleccionUnicaTipo.clear();
+            comboCerradaEscalaTipo.clear();
+            
+            String valor = event.getValue();
+
+            // Primero limpiamos todo
+            comboCerradaEleccionUnicaTipo.clear();
+            comboCerradaEscalaTipo.clear();
+            validacion.clear();
+            inicioEscala.clear();
+            finEscala.clear();
+            incremento.clear();
+            opcionesTemp.clear();  // limpiar la lista de opciones en memoria
+            seccionOpciones.removeAll();  // limpiar visualmente el layout
+
+
+            // Ocultamos todo por defecto
+            comboCerradaEleccionUnicaTipo.setVisible(false);
+            comboCerradaEscalaTipo.setVisible(false);
+            validacion.setVisible(false);
+            inicioEscala.setVisible(false);
+            finEscala.setVisible(false);
+            incremento.setVisible(false);
+
+            //Cargamos nuevamente la seccion de opciones
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            seccionOpciones.add(nuevaSeccion);
+
+            // Ahora evaluamos cada sección
+            if ("Elección única".equals(valor)) {
+                comboCerradaEleccionUnicaTipo.setVisible(true);
+
+            }
+
+            if ("Elección múltiple".equals(valor)) {
+                // Aquí irán los campos para Elección múltiple en el futuro
+                seccionOpciones.setVisible(true);
+            }
+
+            if ("Ranking".equals(valor)) {
+                // Aquí irán los campos para Ranking en el futuro
+                seccionOpciones.setVisible(true);
+            }
+
+            if ("Escala".equals(valor)) {
+                comboCerradaEscalaTipo.setVisible(true);
+                seccionOpciones.setVisible(false);
+            }
+        });
+
+        comboCerradaEleccionUnicaTipo.addValueChangeListener(event -> {
+            String valor = event.getValue();
+
+            // Siempre limpiar y ocultar primero
+            validacion.clear();
+            validacion.setVisible(false);
+            opcionesTemp.clear();
+            seccionOpciones.removeAll();
+
+
+            //Cargamos nuevamente la seccion de opciones
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            seccionOpciones.add(nuevaSeccion);
+
+            // Activar campos según selección
+            if ("Dicotómica".equals(valor)) {
+                validacion.setVisible(true);
+                seccionOpciones.setVisible(true);
+            }
+
+            if ("Politómica".equals(valor)) {
+                // Aquí podrías agregar futuros campos para Politómica
+                seccionOpciones.setVisible(true);
+            }
+        });
+
+        comboCerradaEscalaTipo.addValueChangeListener(event -> {
+            String valor = event.getValue();
+
+            // Primero siempre limpiamos todos los campos
+            inicioEscala.clear();
+            finEscala.clear();
+            incremento.clear();
+
+            inicioEscala.setVisible(false);
+            finEscala.setVisible(false);
+            incremento.setVisible(false);
+
+            // Ahora según el valor, habilitamos los que correspondan
+            if ("Numérica".equals(valor)) {
+                inicioEscala.setVisible(true);
+                finEscala.setVisible(true);
+                incremento.setVisible(true);
+            }
+
+            if ("Nominal".equals(valor)) {
+                // Aquí podrías agregar futuros campos para Nominal
+            }
+
+            if ("Likert".equals(valor)) {
+                // Aquí podrías agregar futuros campos para Likert
+            }
+        });
+
         VerticalLayout formulario = new VerticalLayout(
                 comboTipo,
+                comboCerradaTipo,
+                comboCerradaEleccionUnicaTipo,
+                comboCerradaEscalaTipo,
                 textoPregunta,
                 chkObligatoria,
                 validacion,
                 inicioEscala,
                 finEscala,
-                incremento
-        );
+                incremento,
+                seccionOpciones);
 
         Button guardar = new Button("Guardar", e -> {
             if (comboTipo.isEmpty() || textoPregunta.isEmpty()) {
@@ -173,10 +335,40 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             }
             Encuesta encuesta = encuestaOpt.get();
 
-
             Pregunta nueva = new Pregunta();
             nueva.setEncuesta(encuesta);
-            nueva.setTipoPregunta(comboTipo.getValue());
+
+            // Logica para establecer correctamente el tipoPregunta
+            TipoPregunta tipoSeleccionado = comboTipo.getValue();
+
+            // Si es cerradas, evaluamos el segundo nivel
+            if ("Cerradas".equals(tipoSeleccionado.getNombreTipo())) {
+
+                String subTipo = comboCerradaTipo.getValue();
+
+                if ("Elección única".equals(subTipo)) {
+                    String subTipoUnica = comboCerradaEleccionUnicaTipo.getValue();
+                    tipoSeleccionado = tipoPreguntaService.buscarPorNombre(subTipoUnica);
+                }
+
+                else if ("Elección múltiple".equals(subTipo)) {
+                    tipoSeleccionado = tipoPreguntaService.buscarPorNombre("Elección Múltiple");
+                }
+
+                else if ("Ranking".equals(subTipo)) {
+                    tipoSeleccionado = tipoPreguntaService.buscarPorNombre("Ranking");
+                }
+
+                else if ("Escala".equals(subTipo)) {
+                    String subTipoEscala = comboCerradaEscalaTipo.getValue();
+                    tipoSeleccionado = tipoPreguntaService.buscarPorNombre(subTipoEscala);
+                }
+
+            }
+
+            // Finalmente seteamos el tipo exacto
+            nueva.setTipoPregunta(tipoSeleccionado);
+
             nueva.setTextoPregunta(textoPregunta.getValue());
             nueva.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
             nueva.setValidacion(validacion.getValue());
@@ -203,141 +395,287 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     }
 
     private void confirmarEliminar(Pregunta pregunta) {
-    Dialog confirmDialog = new Dialog();
-    confirmDialog.setHeaderTitle("Confirmar eliminación");
+        Dialog confirmDialog = new Dialog();
+        confirmDialog.setHeaderTitle("Confirmar eliminación");
 
-    Button confirmar = new Button("Eliminar", e -> {
-        preguntaService.eliminar(pregunta.getIdPregunta());
-        confirmDialog.close();
-        actualizarGrid();
-        Notification.show("Pregunta eliminada correctamente", 3000, Notification.Position.TOP_CENTER);
-    });
+        Button confirmar = new Button("Eliminar", e -> {
+            preguntaService.eliminar(pregunta.getIdPregunta());
+            confirmDialog.close();
+            actualizarGrid();
+            Notification.show("Pregunta eliminada correctamente", 3000, Notification.Position.TOP_CENTER);
+        });
 
-    confirmar.addThemeVariants(ButtonVariant.LUMO_ERROR);
-    Button cancelar = new Button("Cancelar", e -> confirmDialog.close());
+        confirmar.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        Button cancelar = new Button("Cancelar", e -> confirmDialog.close());
 
-    confirmDialog.add("¿Está seguro de eliminar esta pregunta?");
-    confirmDialog.getFooter().add(confirmar, cancelar);
-    confirmDialog.open();
-   }
+        confirmDialog.add("¿Está seguro de eliminar esta pregunta?");
+        confirmDialog.getFooter().add(confirmar, cancelar);
+        confirmDialog.open();
+    }
 
-   private void mostrarDetallePregunta(Pregunta pregunta) {
-    Dialog dialog = new Dialog();
-    dialog.setHeaderTitle("Detalle de Pregunta");
+    private void mostrarDetallePregunta(Pregunta pregunta) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Detalle de Pregunta");
 
-    TextField id = new TextField("ID");
-    id.setValue(String.valueOf(pregunta.getIdPregunta()));
-    id.setReadOnly(true);
+        TextField id = new TextField("ID");
+        id.setValue(String.valueOf(pregunta.getIdPregunta()));
+        id.setReadOnly(true);
 
-    TextField tipo = new TextField("Tipo de Pregunta");
-    tipo.setValue(pregunta.getTipoPregunta() != null ? pregunta.getTipoPregunta().getNombreTipo() : "(sin tipo)");
-    tipo.setReadOnly(true);
+        TextField tipo = new TextField("Tipo de Pregunta");
+        tipo.setValue(pregunta.getTipoPregunta() != null ? pregunta.getTipoPregunta().getNombreTipo() : "(sin tipo)");
+        tipo.setReadOnly(true);
 
-    TextArea texto = new TextArea("Texto de la Pregunta");
-    texto.setValue(pregunta.getTextoPregunta() != null ? pregunta.getTextoPregunta() : "");
-    texto.setReadOnly(true);
-    texto.setWidthFull();
+        TextArea texto = new TextArea("Texto de la Pregunta");
+        texto.setValue(pregunta.getTextoPregunta() != null ? pregunta.getTextoPregunta() : "");
+        texto.setReadOnly(true);
+        texto.setWidthFull();
 
-    Checkbox obligatorio = new Checkbox("¿Es obligatoria?");
-    obligatorio.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
-    obligatorio.setReadOnly(true);
+        Checkbox obligatorio = new Checkbox("¿Es obligatoria?");
+        obligatorio.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
+        obligatorio.setReadOnly(true);
 
-    TextField validacion = new TextField("Regla de Validación");
-    validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
-    validacion.setReadOnly(true);
+        TextField validacion = new TextField("Regla de Validación");
+        validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
+        validacion.setReadOnly(true);
 
-    NumberField inicio = new NumberField("Valor inicio escala");
-    inicio.setValue(pregunta.getValorInicioEscala());
-    inicio.setReadOnly(true);
+        NumberField inicio = new NumberField("Valor inicio escala");
+        inicio.setValue(pregunta.getValorInicioEscala());
+        inicio.setReadOnly(true);
 
-    NumberField fin = new NumberField("Valor fin escala");
-    fin.setValue(pregunta.getValorFinEscala());
-    fin.setReadOnly(true);
+        NumberField fin = new NumberField("Valor fin escala");
+        fin.setValue(pregunta.getValorFinEscala());
+        fin.setReadOnly(true);
 
-    NumberField incremento = new NumberField("Incremento escala");
-    incremento.setValue(pregunta.getIncrementoEscala());
-    incremento.setReadOnly(true);
+        NumberField incremento = new NumberField("Incremento escala");
+        incremento.setValue(pregunta.getIncrementoEscala());
+        incremento.setReadOnly(true);
 
-    VerticalLayout contenido = new VerticalLayout(
-            id, tipo, texto, obligatorio, validacion, inicio, fin, incremento
-    );
+        VerticalLayout contenido = new VerticalLayout(
+                id, tipo, texto, obligatorio, validacion, inicio, fin, incremento);
 
-    Button cerrar = new Button("Cerrar", e -> dialog.close());
-    cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        Button cerrar = new Button("Cerrar", e -> dialog.close());
+        cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
-    dialog.add(contenido);
-    dialog.setWidth("600px");
-    dialog.setHeight("auto");
+        dialog.add(contenido);
+        dialog.setWidth("600px");
+        dialog.setHeight("auto");
 
-    dialog.getFooter().add(cerrar);
-    dialog.open();
-}
+        dialog.getFooter().add(cerrar);
+        dialog.open();
+    }
 
-private void mostrarFormularioEditar(Pregunta pregunta) {
-    Dialog dialog = new Dialog();
-    dialog.setHeaderTitle("Editar Pregunta");
-    dialog.setWidth("600px");
+    private void mostrarFormularioEditar(Pregunta pregunta) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Editar Pregunta");
+        dialog.setWidth("600px");
 
-    ComboBox<TipoPregunta> comboTipo = new ComboBox<>("Tipo de Pregunta");
-    comboTipo.setItems(tipoPreguntaService.listarTodos());
-    comboTipo.setItemLabelGenerator(TipoPregunta::getNombreTipo);
-    comboTipo.setValue(pregunta.getTipoPregunta());
-    comboTipo.setWidthFull();
+        // Cargar los tipos principales (Abierta, Cerrada, Mixta)
+        List<TipoPregunta> tiposPrincipales = tipoPreguntaService.listarTodos().stream()
+                .filter(tp -> List.of(1, 2, 3).contains(tp.getIdTipoPregunta()))
+                .toList();
 
-    TextArea textoPregunta = new TextArea("Texto de la Pregunta");
-    textoPregunta.setValue(pregunta.getTextoPregunta() != null ? pregunta.getTextoPregunta() : "");
-    textoPregunta.setWidthFull();
-    textoPregunta.setMaxLength(1000);
+        ComboBox<TipoPregunta> comboTipo = new ComboBox<>("Tipo de Pregunta");
+        comboTipo.setItems(tiposPrincipales);
+        comboTipo.setItemLabelGenerator(TipoPregunta::getNombreTipo);
+        comboTipo.setWidthFull();
 
-    Checkbox chkObligatoria = new Checkbox("¿Es obligatoria?");
-    chkObligatoria.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
+        ComboBox<String> comboCerradaTipo = new ComboBox<>("Cerrada tipo:");
+        comboCerradaTipo.setItems("Elección única", "Elección múltiple", "Ranking", "Escala");
+        comboCerradaTipo.setWidthFull();
 
-    TextField validacion = new TextField("Regla de Validación");
-    validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
+        ComboBox<String> comboCerradaEleccionUnicaTipo = new ComboBox<>("Elección única tipo:");
+        comboCerradaEleccionUnicaTipo.setItems("Dicotómica", "Politómica");
+        comboCerradaEleccionUnicaTipo.setWidthFull();
 
-    NumberField inicioEscala = new NumberField("Valor inicio escala");
-    inicioEscala.setValue(pregunta.getValorInicioEscala());
+        ComboBox<String> comboCerradaEscalaTipo = new ComboBox<>("Escala tipo:");
+        comboCerradaEscalaTipo.setItems("Numérica", "Nominal", "Likert");
+        comboCerradaEscalaTipo.setWidthFull();
 
-    NumberField finEscala = new NumberField("Valor fin escala");
-    finEscala.setValue(pregunta.getValorFinEscala());
+        TextArea textoPregunta = new TextArea("Texto de la Pregunta");
+        textoPregunta.setWidthFull();
+        textoPregunta.setMaxLength(1000);
+        textoPregunta.setValue(pregunta.getTextoPregunta() != null ? pregunta.getTextoPregunta() : "");
 
-    NumberField incremento = new NumberField("Incremento escala");
-    incremento.setValue(pregunta.getIncrementoEscala());
+        Checkbox chkObligatoria = new Checkbox("¿Es obligatoria?");
+        chkObligatoria.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
 
-    VerticalLayout formulario = new VerticalLayout(
-            comboTipo, textoPregunta, chkObligatoria,
-            validacion, inicioEscala, finEscala, incremento
-    );
+        TextField validacion = new TextField("Regla de Validación");
+        validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
+        validacion.setVisible(false);
 
-    Button guardar = new Button("Guardar", e -> {
-        if (comboTipo.isEmpty() || textoPregunta.isEmpty()) {
-            Notification.show("Complete los campos obligatorios.", 3000, Notification.Position.MIDDLE);
-            return;
+        NumberField inicioEscala = new NumberField("Valor inicio escala");
+        inicioEscala.setValue(pregunta.getValorInicioEscala());
+        inicioEscala.setVisible(false);
+
+        NumberField finEscala = new NumberField("Valor fin escala");
+        finEscala.setValue(pregunta.getValorFinEscala());
+        finEscala.setVisible(false);
+
+        NumberField incremento = new NumberField("Incremento escala");
+        incremento.setValue(pregunta.getIncrementoEscala());
+        incremento.setVisible(false);
+
+        // Obtenemos el ID real de la pregunta
+        TipoPregunta tipoActual = pregunta.getTipoPregunta();
+        int id = tipoActual.getIdTipoPregunta();
+
+        // Primero ocultamos todo
+        comboCerradaTipo.setVisible(false);
+        comboCerradaEleccionUnicaTipo.setVisible(false);
+        comboCerradaEscalaTipo.setVisible(false);
+
+        // Logica completa según ID
+        if (id == 1) { // Abierta
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(1));
+        } else if (id == 2) { // Cerradas base
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+        } else if (id == 3) { // Mixtas
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(3));
+        } else if (id == 4) { // Elección única base
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Elección única");
+        } else if (id == 5) { // Elección múltiple
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Elección múltiple");
+        } else if (id == 6) { // Ranking
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Ranking");
+        } else if (id == 7) { // Escala base
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Escala");
+        } else if (id == 8) { // Dicotómica
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Elección única");
+            comboCerradaEleccionUnicaTipo.setVisible(true);
+            comboCerradaEleccionUnicaTipo.setValue("Dicotómica");
+            validacion.setVisible(true);
+        } else if (id == 9) { // Politómica
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Elección única");
+            comboCerradaEleccionUnicaTipo.setVisible(true);
+            comboCerradaEleccionUnicaTipo.setValue("Politómica");
+        } else if (id == 10) { // Numérica
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Escala");
+            comboCerradaEscalaTipo.setVisible(true);
+            comboCerradaEscalaTipo.setValue("Numérica");
+            inicioEscala.setVisible(true);
+            finEscala.setVisible(true);
+            incremento.setVisible(true);
+        } else if (id == 11) { // Nominal
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Escala");
+            comboCerradaEscalaTipo.setVisible(true);
+            comboCerradaEscalaTipo.setValue("Nominal");
+        } else if (id == 12) { // Likert
+            comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
+            comboCerradaTipo.setVisible(true);
+            comboCerradaTipo.setValue("Escala");
+            comboCerradaEscalaTipo.setVisible(true);
+            comboCerradaEscalaTipo.setValue("Likert");
         }
 
-        pregunta.setTipoPregunta(comboTipo.getValue());
-        pregunta.setTextoPregunta(textoPregunta.getValue());
-        pregunta.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
-        pregunta.setValidacion(validacion.getValue());
-        pregunta.setValorInicioEscala(inicioEscala.getValue());
-        pregunta.setValorFinEscala(finEscala.getValue());
-        pregunta.setIncrementoEscala(incremento.getValue());
+        // Los combos siempre serán de solo lectura
+        comboTipo.setReadOnly(true);
+        comboCerradaTipo.setReadOnly(true);
+        comboCerradaEleccionUnicaTipo.setReadOnly(true);
+        comboCerradaEscalaTipo.setReadOnly(true);
 
-        preguntaService.guardar(pregunta);
-        dialog.close();
-        actualizarGrid();
-        Notification.show("Pregunta actualizada correctamente.", 3000, Notification.Position.TOP_CENTER);
-    });
+        VerticalLayout formulario = new VerticalLayout(
+                comboTipo,
+                comboCerradaTipo,
+                comboCerradaEleccionUnicaTipo,
+                comboCerradaEscalaTipo,
+                textoPregunta,
+                chkObligatoria,
+                validacion,
+                inicioEscala,
+                finEscala,
+                incremento);
 
-    Button cancelar = new Button("Cancelar", e -> dialog.close());
-    cancelar.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        Button guardar = new Button("Guardar", e -> {
+            if (comboTipo.isEmpty() || textoPregunta.isEmpty()) {
+                Notification.show("Complete los campos obligatorios.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
 
-    HorizontalLayout acciones = new HorizontalLayout(guardar, cancelar);
-    dialog.getFooter().add(acciones);
-    dialog.add(formulario);
-    dialog.open();
-}
+            pregunta.setTextoPregunta(textoPregunta.getValue());
+            pregunta.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
+            pregunta.setValidacion(validacion.getValue());
+            pregunta.setValorInicioEscala(inicioEscala.getValue());
+            pregunta.setValorFinEscala(finEscala.getValue());
+            pregunta.setIncrementoEscala(incremento.getValue());
+
+            preguntaService.guardar(pregunta);
+            dialog.close();
+            actualizarGrid();
+            Notification.show("Pregunta actualizada correctamente.", 3000, Notification.Position.TOP_CENTER);
+        });
+
+        Button cancelar = new Button("Cancelar", e -> dialog.close());
+        cancelar.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
+        HorizontalLayout acciones = new HorizontalLayout(guardar, cancelar);
+        dialog.getFooter().add(acciones);
+        dialog.add(formulario);
+        dialog.open();
+    }
 
 
+    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp) {
+        Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
+        gridOpciones.setHeight("200px");
+        
+        gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto").setAutoWidth(true);
+        gridOpciones.addColumn(Opcion::getOrden).setHeader("Correlativo").setAutoWidth(true);
+        gridOpciones.addComponentColumn(opcion -> {
+            Button eliminar = new Button(new Icon("lumo", "cross"));
+            eliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
+            eliminar.addClickListener(ev -> {
+                opcionesTemp.remove(opcion);
+                for (int i = 0; i < opcionesTemp.size(); i++) {
+                    opcionesTemp.get(i).setOrden(i + 1);
+                }
+                gridOpciones.setItems(opcionesTemp);
+            });
+            return eliminar;
+        }).setHeader("Acciones");
+
+        TextField textoOpcion = new TextField("Texto de opción");
+        NumberField orden = new NumberField("Correlativo");
+        orden.setStep(1);
+        orden.setValue(0.0);
+        orden.setMin(0);
+
+        Button btnAgregarOpcion = new Button("Agregar Opción", e -> {
+            if (textoOpcion.isEmpty()) {
+                Notification.show("Ingrese texto de opción");
+                return;
+            }
+            Opcion nueva = new Opcion();
+            nueva.setTextoOpcion(textoOpcion.getValue());
+            nueva.setOrden(orden.getValue().intValue());
+            nueva.setOrden(opcionesTemp.size() + 1);
+            opcionesTemp.add(nueva);
+            gridOpciones.setItems(opcionesTemp);
+            textoOpcion.clear();
+            orden.setValue(0.0);
+        });
+
+        VerticalLayout seccion = new VerticalLayout(textoOpcion, orden, btnAgregarOpcion, gridOpciones);
+        seccion.setPadding(false);
+        seccion.setSpacing(false);
+        seccion.getStyle().set("border", "1px solid #ddd").set("padding", "10px");
+        return seccion;
+    }
 
 }
