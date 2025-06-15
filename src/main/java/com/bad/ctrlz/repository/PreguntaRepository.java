@@ -17,4 +17,5 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Integer> {
     @Query("SELECT p FROM Pregunta p JOIN FETCH p.tipoPregunta WHERE p.encuesta.idEncuesta = :idEncuesta")
     List<Pregunta> findByEncuestaConTipoPregunta(@Param("idEncuesta") Integer idEncuesta);
 
+    List<Pregunta> findByEncuestaIdEncuesta(Integer idEncuesta);
 }
