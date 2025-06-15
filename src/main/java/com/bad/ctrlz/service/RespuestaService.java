@@ -1,23 +1,42 @@
 package com.bad.ctrlz.service;
 
+import com.bad.ctrlz.dto.GraficoPreguntaDTO;
+import com.bad.ctrlz.dto.RespuestaIndividualDTO;
+import com.bad.ctrlz.model.Pregunta;
 import com.bad.ctrlz.model.Respuesta;
+import com.bad.ctrlz.model.RespuestaEncuesta;
 import com.bad.ctrlz.repository.RespuestaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class RespuestaService {
 
-    private final RespuestaRepository respuestaRepository;
-
     @Autowired
-    public RespuestaService(RespuestaRepository respuestaRepository) {
-        this.respuestaRepository = respuestaRepository;
+    private RespuestaRepository respuestaRepository;
+
+    public List<Respuesta> obtenerRespuestasPorPregunta(Pregunta pregunta) {
+        return respuestaRepository.findByPregunta(pregunta);
     }
 
-    @Transactional
-    public void guardar(Respuesta respuesta) {
-        respuestaRepository.save(respuesta);
+    public List<Respuesta> obtenerRespuestasPorEncuesta(RespuestaEncuesta respuestaEncuesta) {
+        return respuestaRepository.findByRespuestaEncuesta(respuestaEncuesta);
     }
+
+    public List<Respuesta> obtenerTodasRespuestas() {
+        return respuestaRepository.findAllWithPreguntaAndOpcion();
+    }
+
+    public List<RespuestaIndividualDTO> obtenerRespuestasPorPregunta(Integer idPregunta) {
+    return respuestaRepository.obtenerRespuestasPorPregunta(idPregunta);
+    }
+
+    public List<GraficoPreguntaDTO> obtenerGraficoPorPregunta(Integer idPregunta) {
+    return respuestaRepository.obtenerConteoPorRespuesta(idPregunta);
+    }
+
+
+
 }
