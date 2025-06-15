@@ -1,5 +1,7 @@
 package com.bad.ctrlz.service;
 
+import com.bad.ctrlz.dto.GraficoPreguntaDTO;
+import com.bad.ctrlz.dto.RespuestaIndividualDTO;
 import com.bad.ctrlz.model.Pregunta;
 import com.bad.ctrlz.model.Respuesta;
 import com.bad.ctrlz.model.RespuestaEncuesta;
@@ -26,5 +28,15 @@ public class RespuestaService {
     public List<Respuesta> obtenerTodasRespuestas() {
         return respuestaRepository.findAllWithPreguntaAndOpcion();
     }
+
+    public List<RespuestaIndividualDTO> obtenerRespuestasPorPregunta(Integer idPregunta) {
+    return respuestaRepository.obtenerRespuestasPorPregunta(idPregunta);
+    }
+
+    public List<GraficoPreguntaDTO> obtenerGraficoPorPregunta(Integer idPregunta) {
+    return respuestaRepository.obtenerConteoPorRespuesta(idPregunta);
+    }
+
+
 
 }
