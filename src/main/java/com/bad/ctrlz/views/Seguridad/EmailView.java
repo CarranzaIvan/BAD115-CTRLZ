@@ -37,11 +37,11 @@ public class EmailView {
                 .append("<div class='credentials-section'>")
                 .append("<h3>Tus nuevas credenciales de acceso:</h3>")
                 .append("<div class='credential-item'>")
-                .append("<span class='label'>Usuario:</span>")
+                .append("<span class='label'>Usuario: </span>")
                 .append("<span class='value'>").append(correo).append("</span>")
                 .append("</div>")
                 .append("<div class='credential-item'>")
-                .append("<span class='label'>Nueva contraseña:</span>")
+                .append("<span class='label'>Nueva contraseña: </span>")
                 .append("<span class='password'>").append(contrasena).append("</span>")
                 .append("</div>")
                 .append("</div>");

@@ -82,7 +82,7 @@ public class UsuarioService {
         String descripcion = "Hemos recibido su solicitud de recuperación de credenciales para acceder al sistema de encuestas CTRLZ.\r\n" + //
                             "A continuación, encontrará la información necesaria para restablecer su acceso:\r\n" + //
                             "";
-        String consideracion = "Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlz@gmail.com para mayor seguridad.\r\n";
+        String consideracion = "Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.\r\n";
         
         // Datos de usuario
         String nuevaContrasena = passwordGenerator.generateRandomPassword(8);

@@ -12,9 +12,9 @@ import java.util.Optional;
 @Service
 public class EncuestaServiceImpl implements EncuestaService {
 
+    @Autowired
     private final EncuestaRepository encuestaRepository;
 
-    @Autowired
     public EncuestaServiceImpl(EncuestaRepository encuestaRepository) {
         this.encuestaRepository = encuestaRepository;
     }

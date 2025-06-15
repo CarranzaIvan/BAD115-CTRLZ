@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Responder Encuesta")
 public class ResponderEncuestaPublicaView extends VerticalLayout implements HasUrlParameter<String> {
 
+    @Autowired
     private final EncuestaService encuestaService;
 
-    @Autowired
     public ResponderEncuestaPublicaView(EncuestaService encuestaService) {
         this.encuestaService = encuestaService;
 
@@ -41,12 +41,12 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
     private void mostrarEncuesta(Encuesta encuesta) {
         Div card = new Div();
         card.getStyle()
-            .set("background-color", "white")
-            .set("border-radius", "10px")
-            .set("padding", "40px")
-            .set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
-            .set("max-width", "600px")
-            .set("width", "100%");
+                .set("background-color", "white")
+                .set("border-radius", "10px")
+                .set("padding", "40px")
+                .set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
+                .set("max-width", "600px")
+                .set("width", "100%");
 
         H2 titulo = new H2(encuesta.getTitulo());
         titulo.getStyle().set("margin-bottom", "20px").set("color", "#1565c0");
@@ -65,12 +65,12 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
     private void mostrarMensaje(String mensaje) {
         Div errorCard = new Div();
         errorCard.getStyle()
-            .set("background-color", "white")
-            .set("border-radius", "10px")
-            .set("padding", "40px")
-            .set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
-            .set("max-width", "600px")
-            .set("width", "100%");
+                .set("background-color", "white")
+                .set("border-radius", "10px")
+                .set("padding", "40px")
+                .set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
+                .set("max-width", "600px")
+                .set("width", "100%");
 
         H2 mensajeError = new H2(mensaje);
         mensajeError.getStyle().set("color", "#d32f2f");

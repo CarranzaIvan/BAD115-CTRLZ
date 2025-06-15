@@ -1,7 +1,6 @@
 package com.bad.ctrlz.views.Seguridad;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import com.bad.ctrlz.model.Usuario;
 import com.bad.ctrlz.service.UsuarioService;
 import com.vaadin.flow.component.Component;
@@ -16,6 +15,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
@@ -450,6 +450,12 @@ public class LoginView extends VerticalLayout {
         /*
          * Formulario de Recuperacion de credenciales
          */
+        /*
+         * Formulario de Recuperacion de credenciales con barra de carga
+         */
+        /*
+         * Formulario de Recuperacion de credenciales con barra de carga
+         */
         private Component createResetPasswordForm() {
                 FormLayout formLayout = new FormLayout();
                 formLayout.addClassName("auth-form");
@@ -457,14 +463,15 @@ public class LoginView extends VerticalLayout {
                 // Crear Binder para validaciones
                 Binder<Usuario> binder = new Binder<>(Usuario.class);
 
+                // Campo de email
                 EmailField emailField = new EmailField("Email");
                 emailField.setPrefixComponent(VaadinIcon.ENVELOPE.create());
                 emailField.setWidthFull();
                 emailField.setPlaceholder("tu@email.com");
                 emailField.setRequired(true);
-                emailField.getStyle().set("margin-bottom", "20px");
+                emailField.getStyle().set("margin-bottom", "15px");
 
-                // Validaciones para email en el formulario de recuperación - CORREGIDAS
+                // Validaciones para email en el formulario de recuperación
                 binder.forField(emailField)
                                 .asRequired("El email es obligatorio")
                                 .withValidator(new EmailValidator("El formato del email no es válido"))
@@ -472,20 +479,74 @@ public class LoginView extends VerticalLayout {
                                                 "El email no puede exceder 150 caracteres")
                                 .bind(Usuario::getCorreo, Usuario::setCorreo);
 
-                Button sendLinkButton = new Button("Recupera credenciales");
+                // Crear barra de progreso (inicialmente oculta)
+                ProgressBar progressBar = new ProgressBar();
+                progressBar.setIndeterminate(true);
+                progressBar.setVisible(false);
+                progressBar.getStyle()
+                                .set("width", "100%")
+                                .set("margin", "15px 0 10px 0")
+                                .set("height", "4px");
+
+                // Crear etiqueta de estado (inicialmente oculta)
+                Paragraph statusLabel = new Paragraph();
+                statusLabel.setVisible(false);
+                statusLabel.getStyle()
+                                .set("text-align", "center")
+                                .set("color", "#666")
+                                .set("font-size", "14px")
+                                .set("margin", "0 0 20px 0")
+                                .set("font-weight", "500");
+
+                // Botón principal
+                Button sendLinkButton = new Button("Recuperar credenciales");
                 sendLinkButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
                 sendLinkButton.setWidthFull();
                 sendLinkButton.getStyle()
                                 .set("height", "45px")
                                 .set("font-weight", "bold");
 
+                // Botón secundario
                 Button backButton = new Button("Volver al inicio de sesión");
                 backButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
                 backButton.setWidthFull();
                 backButton.getStyle().set("margin-top", "15px");
                 backButton.addClickListener(e -> showAuthTabs());
 
-                // Eventos con validaciones corregidas
+                // Método para mostrar la barra de carga con animación
+                Runnable showLoading = () -> {
+                        // Deshabilitar interacciones
+                        sendLinkButton.setEnabled(false);
+                        backButton.setEnabled(false);
+                        emailField.setEnabled(false);
+
+                        // Mostrar elementos de carga con transición suave
+                        progressBar.setVisible(true);
+                        statusLabel.setVisible(true);
+                        statusLabel.setText("Procesando solicitud...");
+
+                        // Cambiar texto del botón
+                        sendLinkButton.setText("Enviando...");
+                        sendLinkButton.setIcon(VaadinIcon.SPINNER.create());
+                };
+
+                // Método para ocultar la barra de carga
+                Runnable hideLoading = () -> {
+                        // Ocultar elementos de carga
+                        progressBar.setVisible(false);
+                        statusLabel.setVisible(false);
+
+                        // Rehabilitar interacciones
+                        sendLinkButton.setEnabled(true);
+                        backButton.setEnabled(true);
+                        emailField.setEnabled(true);
+
+                        // Restaurar botón original
+                        sendLinkButton.setText("Recuperar credenciales");
+                        sendLinkButton.setIcon(null);
+                };
+
+                // Evento del botón con validaciones y barra de carga
                 sendLinkButton.addClickListener(event -> {
                         // Validar usando el binder
                         if (!binder.validate().isOk()) {
@@ -493,35 +554,76 @@ public class LoginView extends VerticalLayout {
                                 return;
                         }
 
-                        String email = emailField.getValue();
-                        Boolean emailValid = usuarioService.validarEmail(email);
-                        if (!emailValid) {
-                                showErrorNotification("El email no está registrado");
-                                return;
-                        }
+                        String email = emailField.getValue().trim().toLowerCase();
 
-                        Boolean emailBlock = usuarioService.validarBloqueo(email);
-                        if (emailBlock) {
-                                showErrorNotification(
-                                                "El email se encuentra bloqueado, comunicarse con ctrlzbad@gmail.com");
-                                return;
-                        }
+                        try {
+                                // Mostrar barra de carga inmediatamente
+                                showLoading.run();
 
-                        // Simular el envío del enlace de recuperación
-                        Boolean enviado = usuarioService.enviarCorreoRecuperacion(email);
+                                // Actualizar estado: Verificando email
+                                statusLabel.setText("Verificando email en el sistema...");
 
-                        if (enviado) {
-                                showSuccessNotification("Enlace de recuperación enviado a " + email);
-                        } else {
-                                showErrorNotification("Error al enviar el correo. Verifica la configuración.");
+                                // Validar email en el servidor
+                                Boolean emailValid = usuarioService.validarEmail(email);
+
+                                if (!emailValid) {
+                                        hideLoading.run();
+                                        showErrorNotification("El email no está registrado en nuestro sistema");
+                                        emailField.focus();
+                                        return;
+                                }
+
+                                // Actualizar estado: Verificando bloqueo
+                                statusLabel.setText("Verificando estado de la cuenta...");
+
+                                Boolean emailBlock = usuarioService.validarBloqueo(email);
+
+                                if (emailBlock) {
+                                        hideLoading.run();
+                                        showErrorNotification(
+                                                        "La cuenta se encuentra bloqueada. Contacta a ctrlzbad@gmail.com");
+                                        return;
+                                }
+
+                                // Actualizar estado: Enviando correo
+                                statusLabel.setText("Enviando correo de recuperación...");
+
+                                Boolean enviado = usuarioService.enviarCorreoRecuperacion(email);
+
+                                // Ocultar barra de carga
+                                hideLoading.run();
+
+                                if (enviado) {
+                                        showSuccessNotification("Enlace de recuperación enviado a " + email);
+                                        // Limpiar formulario
+                                        emailField.clear();
+                                        binder.setBean(new Usuario());
+                                        // Volver al login automáticamente
+                                        showAuthTabs();
+                                } else {
+                                        showErrorNotification(
+                                                        "Error al enviar el correo. Verifica la configuración del servidor.");
+                                }
+
+                        } catch (Exception e) {
+                                // Manejar errores y asegurar que se oculte la barra de carga
+                                hideLoading.run();
+                                showErrorNotification("Error inesperado. Intenta nuevamente.");
+                                e.printStackTrace(); // Para debugging
                         }
-                        showAuthTabs();
                 });
 
                 // Configurar el bean inicial para el binder
                 binder.setBean(new Usuario());
 
-                formLayout.add(emailField, sendLinkButton, backButton);
+                // Agregar todos los componentes en el orden correcto
+                formLayout.add(
+                                emailField,
+                                progressBar,
+                                statusLabel,
+                                sendLinkButton,
+                                backButton);
+
                 return formLayout;
         }
 
