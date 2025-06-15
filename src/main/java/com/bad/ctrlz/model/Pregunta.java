@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -39,10 +38,6 @@ public class Pregunta {
     @Column(name = "obligatorio", nullable = false, length = 1)
     private String obligatorio = "N";
 
-    @Lob
-    @Column(name = "validacion")
-    private String validacion;
-
     @Column(name = "valor_inicio_escala")
     private Double valorInicioEscala;
 
@@ -58,14 +53,13 @@ public class Pregunta {
     public Pregunta() { }
 
     public Pregunta(Integer idPregunta, Encuesta encuesta, TipoPregunta tipoPregunta,
-                    String textoPregunta, String obligatorio, String validacion,
+                    String textoPregunta, String obligatorio,
                     Double valorInicioEscala, Double valorFinEscala, Double incrementoEscala) {
         this.idPregunta        = idPregunta;
         this.encuesta          = encuesta;
         this.tipoPregunta      = tipoPregunta;
         this.textoPregunta     = textoPregunta;
         this.obligatorio       = obligatorio;
-        this.validacion        = validacion;
         this.valorInicioEscala = valorInicioEscala;
         this.valorFinEscala    = valorFinEscala;
         this.incrementoEscala  = incrementoEscala;
@@ -109,14 +103,6 @@ public class Pregunta {
 
     public void setObligatorio(String obligatorio) {
         this.obligatorio = obligatorio;
-    }
-
-    public String getValidacion() {
-        return validacion;
-    }
-
-    public void setValidacion(String validacion) {
-        this.validacion = validacion;
     }
 
     public Double getValorInicioEscala() {
