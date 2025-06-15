@@ -645,7 +645,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
         Grid.Column<Opcion> columnaSeleccion = gridOpciones.addComponentColumn(opcion -> {
         Checkbox checkOtro = new Checkbox();
-        checkOtro.setValue(opcion.getesOtro());
+        checkOtro.setValue(opcion.getEsOtro());
 
         checkOtro.addValueChangeListener(event -> {
             if (event.getValue()) {

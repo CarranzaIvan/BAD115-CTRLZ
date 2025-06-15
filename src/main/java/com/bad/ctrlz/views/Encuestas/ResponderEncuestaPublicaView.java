@@ -220,10 +220,36 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                 componentesPorPregunta.put(pregunta, likert);
             }
             case 3 -> {
-                TextArea campoMixto = new TextArea();
-                campoMixto.setWidthFull();
-                preguntaCard.add(campoMixto);
-                componentesPorPregunta.put(pregunta, campoMixto);
+                VerticalLayout mixtoLayout = new VerticalLayout();
+                mixtoLayout.setSpacing(false);
+                mixtoLayout.setPadding(false);
+                mixtoLayout.setWidthFull();
+
+                RadioButtonGroup<Opcion> radioMixto = new RadioButtonGroup<>();
+                List<Opcion> opcionesMixto = opcionService.obtenerOpcionesPorPregunta(pregunta.getIdPregunta());
+                radioMixto.setItems(opcionesMixto);
+                radioMixto.setItemLabelGenerator(Opcion::getTextoOpcion);
+                radioMixto.setWidthFull();
+
+                TextField otroCampo = new TextField("Especifique:");
+                otroCampo.setWidthFull();
+                otroCampo.setVisible(false);
+
+                radioMixto.addValueChangeListener(event -> {
+                    Opcion seleccion = event.getValue();
+                    boolean mostrarOtro = seleccion != null && Boolean.TRUE.equals(seleccion.getEsOtro());
+
+                    otroCampo.setVisible(mostrarOtro);
+                    if (!mostrarOtro) {
+                        otroCampo.clear();
+                    }
+
+                    mixtoLayout.getElement().executeJs("this.requestLayout && this.requestLayout()");
+                });
+
+                mixtoLayout.add(radioMixto, otroCampo);
+                preguntaCard.add(mixtoLayout);
+                componentesPorPregunta.put(pregunta, mixtoLayout);
             }
             default -> preguntaCard.add(new Label("Tipo de pregunta no implementado."));
         }
@@ -274,8 +300,16 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                     invalido = esObligatoria && (seleccion == null);
                 }
                 case 3 -> {
-                    String val = ((TextArea) componente).getValue();
-                    invalido = esObligatoria && (val == null || val.isBlank());
+                    VerticalLayout mixtoLayout = (VerticalLayout) componente;
+                    RadioButtonGroup<Opcion> radioMixto = (RadioButtonGroup<Opcion>) mixtoLayout.getComponentAt(0);
+                    TextField otroCampo = (TextField) mixtoLayout.getComponentAt(1);
+
+                    Opcion seleccion = radioMixto.getValue();
+                    invalido = esObligatoria && (seleccion == null);
+
+                    if (seleccion != null && Boolean.TRUE.equals(seleccion.getEsOtro())) {
+                        invalido = invalido || (otroCampo.getValue() == null || otroCampo.getValue().isBlank());
+                    }
                 }
             }
 
@@ -351,7 +385,18 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                     }
                     case 11 -> respuesta.setOpcion(((ComboBox<Opcion>) componente).getValue());
                     case 12 -> respuesta.setOpcion(((RadioButtonGroup<Opcion>) componente).getValue());
-                    case 3 -> respuesta.setTextoAbierto(((TextArea) componente).getValue());
+                    case 3 -> {
+                        VerticalLayout mixtoLayout = (VerticalLayout) componente;
+                        RadioButtonGroup<Opcion> radioMixto = (RadioButtonGroup<Opcion>) mixtoLayout.getComponentAt(0);
+                        TextField otroCampo = (TextField) mixtoLayout.getComponentAt(1);
+
+                        Opcion seleccion = radioMixto.getValue();
+                        respuesta.setOpcion(seleccion);
+
+                        if (seleccion != null && Boolean.TRUE.equals(seleccion.getEsOtro())) {
+                            respuesta.setTextoAbierto(otroCampo.getValue());
+                        }
+                    }
                 }
 
                 respuestaService.guardar(respuesta);
