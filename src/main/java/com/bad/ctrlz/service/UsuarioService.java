@@ -6,6 +6,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bad.ctrlz.configuraciones.Seguridad.PasswordGenerator;
+import com.bad.ctrlz.configuraciones.Seguridad.CorreoElectronico.SendMail;
 import com.bad.ctrlz.model.Rol;
 import com.bad.ctrlz.model.Usuario;
 import com.bad.ctrlz.repository.RolRepository;
@@ -19,6 +21,12 @@ public class UsuarioService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Autowired
+    private PasswordGenerator passwordGenerator;
+
+    @Autowired
+    private SendMail emailService;
 
     /**
      * Guarda un usuario en la base de datos.
@@ -55,13 +63,35 @@ public class UsuarioService {
         return usuarioRepository.existsByEmail(correo);
     }
 
+    /**
+     * Busca un usuario y verifica si esta bloqueado.
+     * 
+     * @param correo El correo electrónico del usuario a buscar.
+     * @return Un Bolean que indica si el usuario existe o no.
+     */
+    public boolean validarBloqueo(String correo) {
+        return usuarioRepository.userLocked(correo);
+    }
+
     /*
      * Envio de correo electrónico para la recuperación de contraseña
      */
-    public void enviarCorreoRecuperacion(String correo) {
-        // Aquí puedes implementar la lógica para enviar un correo electrónico
-        // al usuario con instrucciones para recuperar su contraseña.
-        // Por ejemplo, generar un token de recuperación y enviarlo por correo.
-        System.out.println("Enviando correo de recuperación a: " + correo);
+    public Boolean enviarCorreoRecuperacion(String correo) {
+        // Informacion estatica
+        String subject = "Recuperación de credenciales";
+        String descripcion = "Hemos recibido su solicitud de recuperación de credenciales para acceder al sistema de encuestas CTRLZ.\r\n" + //
+                            "A continuación, encontrará la información necesaria para restablecer su acceso:\r\n" + //
+                            "";
+        String consideracion = "Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlz@gmail.com para mayor seguridad.\r\n";
+        
+        // Datos de usuario
+        String nuevaContrasena = passwordGenerator.generateRandomPassword(8);
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        String nombre = usuario.getNombre() + " " + usuario.getApellido();
+
+        boolean enviado = false;
+        enviado = emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombre,
+                consideracion);
+        return enviado;
     }
 }

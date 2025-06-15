@@ -1,8 +1,10 @@
 package com.bad.ctrlz.configuraciones.Seguridad;
 import java.security.SecureRandom;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @PreAuthorize("permitAll()")
+@Service
 public class PasswordGenerator {
     // ----------------------------------------------------------------
     //              ALGORITMO GENERADOR DE CONTRASEÑA ALEATORIA
@@ -13,7 +15,7 @@ public class PasswordGenerator {
     private static final String NUMBERS = "0123456789";
 
     @PreAuthorize("permitAll()")
-    public static String generateRandomPassword(int length) {
+    public String generateRandomPassword(int length) {
         // Concatenamos todos los caracteres posibles
         String allCharacters = UPPERCASE_LETTERS + LOWERCASE_LETTERS + NUMBERS;
         SecureRandom random = new SecureRandom();

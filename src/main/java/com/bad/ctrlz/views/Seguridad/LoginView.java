@@ -60,7 +60,7 @@ public class LoginView extends VerticalLayout {
                 setMinHeight("100vh"); // Asegurar altura mínima completa
                 setAlignItems(Alignment.CENTER);
                 setJustifyContentMode(JustifyContentMode.CENTER);
-                
+
                 // Configurar el scroll y expansión automática
                 getStyle().set("overflow-y", "auto");
                 getStyle().set("min-height", "100vh");
@@ -97,7 +97,8 @@ public class LoginView extends VerticalLayout {
                 createForms();
 
                 // Configurar la pestaña de inicio de sesión como seleccionada por defecto
-                VerticalLayout content = new VerticalLayout(dynamicHeader, tabs, pages); // Contenido principal de la tarjeta
+                VerticalLayout content = new VerticalLayout(dynamicHeader, tabs, pages); // Contenido principal de la
+                                                                                         // tarjeta
                 content.setPadding(true); // Espaciado interno
                 content.setSpacing(true); // Espaciado entre componentes
                 content.setAlignItems(Alignment.STRETCH); // Alinea los componentes al inicio
@@ -446,6 +447,9 @@ public class LoginView extends VerticalLayout {
                 return formLayout;
         }
 
+        /*
+         * Formulario de Recuperacion de credenciales
+         */
         private Component createResetPasswordForm() {
                 FormLayout formLayout = new FormLayout();
                 formLayout.addClassName("auth-form");
@@ -468,7 +472,7 @@ public class LoginView extends VerticalLayout {
                                                 "El email no puede exceder 150 caracteres")
                                 .bind(Usuario::getCorreo, Usuario::setCorreo);
 
-                Button sendLinkButton = new Button("Enviar Enlace");
+                Button sendLinkButton = new Button("Recupera credenciales");
                 sendLinkButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
                 sendLinkButton.setWidthFull();
                 sendLinkButton.getStyle()
@@ -496,9 +500,21 @@ public class LoginView extends VerticalLayout {
                                 return;
                         }
 
+                        Boolean emailBlock = usuarioService.validarBloqueo(email);
+                        if (emailBlock) {
+                                showErrorNotification(
+                                                "El email se encuentra bloqueado, comunicarse con ctrlzbad@gmail.com");
+                                return;
+                        }
+
                         // Simular el envío del enlace de recuperación
-                        usuarioService.enviarCorreoRecuperacion(email);
-                        showSuccessNotification("Enlace de recuperación enviado a " + email);
+                        Boolean enviado = usuarioService.enviarCorreoRecuperacion(email);
+
+                        if (enviado) {
+                                showSuccessNotification("Enlace de recuperación enviado a " + email);
+                        } else {
+                                showErrorNotification("Error al enviar el correo. Verifica la configuración.");
+                        }
                         showAuthTabs();
                 });
 
