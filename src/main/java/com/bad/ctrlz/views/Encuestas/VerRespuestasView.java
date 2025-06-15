@@ -15,14 +15,10 @@ import java.util.List;
 @PageTitle("Respuestas de Encuesta")
 public class VerRespuestasView extends VerticalLayout {
 
-    private final RespuestaService respuestaService;
+    @Autowired
     private final Grid<Respuesta> grid = new Grid<>(Respuesta.class, false);
 
-
-    @Autowired
     public VerRespuestasView(RespuestaService respuestaService) {
-        this.respuestaService = respuestaService;
-
         setSizeFull();
         configurarGrid();
 

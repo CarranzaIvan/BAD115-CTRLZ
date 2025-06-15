@@ -27,7 +27,40 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.correo = :correo")
     boolean existsByEmail(@Param("correo") String correo);
 
-    // Buscar existe usuario por correo
-    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Usuario u WHERE u.correo = :correo and u.accountLocked = true")
-    boolean userLocked(@Param("correo") String correo);
+    // Verifica si existe un usuario por correo y que no esté bloqueado
+    @Query("""
+                SELECT COUNT(u) > 0
+                FROM Usuario u
+                WHERE u.correo = :correo
+                  AND u.accountLocked = false
+            """)
+    boolean existsUnlockedUserByCorreo(@Param("correo") String correo);
+
+    // Cuenta usuarios activos (habilitados y no bloqueados)
+    @Query("""
+                SELECT COUNT(u)
+                FROM Usuario u
+                WHERE u.enabled = true
+                  AND u.accountLocked = false
+            """)
+    int contarUsuariosActivos();
+
+    // Cuenta usuarios bloqueados y deshabilitados
+    @Query("""
+                SELECT COUNT(u)
+                FROM Usuario u
+                WHERE u.accountLocked = true
+                  AND u.enabled = false
+            """)
+    int contarUsuariosBloqueados();
+
+    // Cuenta usuarios desactivados (no bloqueados pero deshabilitados)
+    @Query("""
+                SELECT COUNT(u)
+                FROM Usuario u
+                WHERE u.accountLocked = false
+                  AND u.enabled = false
+            """)
+    int contarUsuariosDesactivados();
+
 }

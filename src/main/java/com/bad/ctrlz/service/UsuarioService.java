@@ -70,7 +70,7 @@ public class UsuarioService {
      * @return Un Bolean que indica si el usuario existe o no.
      */
     public boolean validarBloqueo(String correo) {
-        return usuarioRepository.userLocked(correo);
+        return usuarioRepository.existsUnlockedUserByCorreo(correo);
     }
 
     /*
@@ -79,11 +79,12 @@ public class UsuarioService {
     public Boolean enviarCorreoRecuperacion(String correo) {
         // Informacion estatica
         String subject = "Recuperación de credenciales";
-        String descripcion = "Hemos recibido su solicitud de recuperación de credenciales para acceder al sistema de encuestas CTRLZ.\r\n" + //
-                            "A continuación, encontrará la información necesaria para restablecer su acceso:\r\n" + //
-                            "";
+        String descripcion = "Hemos recibido su solicitud de recuperación de credenciales para acceder al sistema de encuestas CTRLZ.\r\n"
+                + //
+                "A continuación, encontrará la información necesaria para restablecer su acceso:\r\n" + //
+                "";
         String consideracion = "Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.\r\n";
-        
+
         // Datos de usuario
         String nuevaContrasena = passwordGenerator.generateRandomPassword(8);
         Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
@@ -94,4 +95,29 @@ public class UsuarioService {
                 consideracion);
         return enviado;
     }
+
+    /*
+     * Contar número de usuarios activos
+     */
+    public Integer obtenerActivos() {
+        Integer activos = usuarioRepository.contarUsuariosActivos();
+        return activos;
+    }
+
+    /*
+     * Contar número de usuarios bloqueados
+     */
+    public Integer obtenerBloqueados() {
+        Integer bloqueados = usuarioRepository.contarUsuariosBloqueados();
+        return bloqueados;
+    }
+
+    /*
+     * Contar número de usuarios inactivos
+     */
+    public Integer obtenerInactivos() {
+        Integer inactivos = usuarioRepository.contarUsuariosDesactivados();
+        return inactivos;
+    }
+
 }

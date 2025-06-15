@@ -9,7 +9,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import elemental.json.Json;
 import elemental.json.JsonArray;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +18,6 @@ import java.util.stream.Collectors;
 @PageTitle("Gráfico de Respuestas")
 public class GraficosRespuestasView extends VerticalLayout {
 
-    @Autowired
     public GraficosRespuestasView(RespuestaService respuestaService) {
 
         List<Respuesta> respuestas = respuestaService.obtenerTodasRespuestas();
