@@ -11,11 +11,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.CascadeType;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+
+
 @Table(name = "pregunta")
 public class Pregunta {
 
@@ -47,8 +50,9 @@ public class Pregunta {
     @Column(name = "incremento_escala")
     private Double incrementoEscala;
 
-    @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "pregunta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Opcion> opciones = new HashSet<>();
+    
 
     public Pregunta() { }
 
