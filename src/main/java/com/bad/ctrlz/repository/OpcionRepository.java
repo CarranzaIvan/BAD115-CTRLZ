@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface OpcionRepository extends JpaRepository<Opcion, Integer> {
-
+//LISTA LAS OPCIONES
     List<Opcion> findByPreguntaIdPreguntaOrderByOrden(Integer idPregunta);
 
     @Query("SELECT o FROM Opcion o WHERE UPPER(TRIM(o.textoOpcion)) = UPPER(TRIM(:textoOpcion)) AND o.pregunta = :pregunta")
