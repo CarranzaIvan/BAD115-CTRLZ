@@ -29,6 +29,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
+import com.vaadin.flow.component.textfield.IntegerField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -138,11 +139,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva Pregunta");
 
-        //Creamos el objeto de seccionOpciones
-        List<Opcion> opcionesTemp = new ArrayList<>();
-        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp);
-        seccionOpciones.setVisible(false);
-
         // Obtenemos de la base sólo los tipos permitidos
         List<String> nombresPermitidos = Arrays.asList("Abiertas", "Cerradas", "Mixtas");
         List<TipoPregunta> tiposPermitidos = tipoPreguntaService.listarTodos().stream()
@@ -171,6 +167,14 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         comboCerradaEscalaTipo.setItems("Numérica", "Nominal", "Likert");
         comboCerradaEscalaTipo.setWidthFull();
         comboCerradaEscalaTipo.setVisible(false);
+
+
+        //Creamos el objeto de seccionOpciones
+        List<Opcion> opcionesTemp = new ArrayList<>();
+        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
+        seccionOpciones.setVisible(false);
+
+
 
         // CAMPOS COMUNES
         TextArea textoPregunta = new TextArea("Texto de la Pregunta");
@@ -232,7 +236,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             incremento.setVisible(false);
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Ahora evaluamos cada sección
@@ -266,7 +270,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Activar campos según selección
@@ -291,7 +295,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             seccionOpciones.removeAll();
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             inicioEscala.setVisible(false);
@@ -631,46 +635,108 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     }
 
 
-    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp) {
+    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp, ComboBox<String> comboCerradaEleccionUnicaTipo, ComboBox<TipoPregunta> comboTipo) {
+        
         Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
         gridOpciones.setHeight("200px");
         
         gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto").setAutoWidth(true);
         gridOpciones.addColumn(Opcion::getOrden).setHeader("Correlativo").setAutoWidth(true);
+
+        Grid.Column<Opcion> columnaSeleccion = gridOpciones.addComponentColumn(opcion -> {
+        Checkbox checkOtro = new Checkbox();
+        checkOtro.setValue(opcion.getEsOtro());
+
+        checkOtro.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                for (Opcion op : opcionesTemp) {
+                    op.setesOtro(false);
+                }
+                opcion.setesOtro(true);
+                gridOpciones.getDataProvider().refreshAll();
+            } else {
+                opcion.setesOtro(false);
+            }
+        });
+
+        return checkOtro;
+        }).setHeader("Selección");
+        
+        //Visibilidad de la columna seleccion
+        columnaSeleccion.setVisible(false);
+        comboTipo.addValueChangeListener(e -> {
+            boolean esMixta = e.getValue() != null && "Mixtas".equals(e.getValue().getNombreTipo());
+            columnaSeleccion.setVisible(esMixta);
+
+        });
+        
         gridOpciones.addComponentColumn(opcion -> {
             Button eliminar = new Button(new Icon("lumo", "cross"));
             eliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
             eliminar.addClickListener(ev -> {
                 opcionesTemp.remove(opcion);
-                for (int i = 0; i < opcionesTemp.size(); i++) {
-                    opcionesTemp.get(i).setOrden(i + 1);
-                }
                 gridOpciones.setItems(opcionesTemp);
             });
             return eliminar;
         }).setHeader("Acciones");
 
         TextField textoOpcion = new TextField("Texto de opción");
-        NumberField orden = new NumberField("Correlativo");
+        IntegerField orden = new IntegerField("Correlativo");
+        orden.setMin(1);
         orden.setStep(1);
-        orden.setValue(0.0);
-        orden.setMin(0);
+        orden.setValue(1); // valor inicial
+        orden.setWidth("150px");
+
+        // Forzamos el atributo type="number" para habilitar las flechitas:
+        orden.getElement().setAttribute("type", "number");
 
         Button btnAgregarOpcion = new Button("Agregar Opción", e -> {
             if (textoOpcion.isEmpty()) {
-                Notification.show("Ingrese texto de opción");
+                Notification.show("Debe ingresar el texto de la opción.", 3000, Notification.Position.MIDDLE);
                 return;
             }
+
+            if (orden.isEmpty()) {
+                Notification.show("Debe ingresar el número de orden.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            int ordenIngresado = orden.getValue().intValue();
+
+            if (ordenIngresado < 1) {
+                Notification.show("El orden debe ser un número entero mayor o igual a 1.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            boolean yaExiste = opcionesTemp.stream()
+                    .anyMatch(op -> op.getOrden() != null && op.getOrden().equals(ordenIngresado));
+
+            if (yaExiste) {
+                Notification.show("El orden ingresado ya está asignado a otra opción.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            // Validación de máximo 2 cuando es Dicotómica
+            if ("Dicotómica".equals(comboCerradaEleccionUnicaTipo.getValue()) && opcionesTemp.size() >= 2) {
+                Notification.show("Solo puede ingresar máximo 2 opciones para preguntas dicotómicas");
+                return;
+            }
+
             Opcion nueva = new Opcion();
             nueva.setTextoOpcion(textoOpcion.getValue());
-            nueva.setOrden(orden.getValue().intValue());
+            nueva.setOrden(ordenIngresado);
             opcionesTemp.add(nueva);
             gridOpciones.setItems(opcionesTemp);
+
             textoOpcion.clear();
-            orden.setValue(0.0);
+            orden.setValue(1);
         });
 
-        VerticalLayout seccion = new VerticalLayout(textoOpcion, orden, btnAgregarOpcion, gridOpciones);
+        HorizontalLayout filaBoton = new HorizontalLayout(btnAgregarOpcion);
+        filaBoton.setWidthFull();
+        filaBoton.setJustifyContentMode(JustifyContentMode.END);
+
+        VerticalLayout seccion = new VerticalLayout( textoOpcion, orden, filaBoton, gridOpciones);
         seccion.setPadding(false);
         seccion.setSpacing(false);
         seccion.getStyle().set("border", "1px solid #ddd").set("padding", "10px");
