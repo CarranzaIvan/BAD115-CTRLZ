@@ -7,6 +7,7 @@ import com.bad.ctrlz.model.TipoPregunta;
 import com.bad.ctrlz.service.EncuestaService;
 import com.bad.ctrlz.service.PreguntaService;
 import com.bad.ctrlz.service.TipoPreguntaService;
+import com.bad.ctrlz.service.OpcionService;
 import com.bad.ctrlz.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -28,7 +29,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import com.vaadin.flow.component.textfield.IntegerField;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,16 +41,19 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     private final PreguntaService preguntaService;
     private final EncuestaService encuestaService;
     private final TipoPreguntaService tipoPreguntaService;
+    private final OpcionService opcionService;
 
     private Grid<Pregunta> grid;
     private Integer idEncuesta;
 
     public CrearPregunta(PreguntaService preguntaService,
             EncuestaService encuestaService,
-            TipoPreguntaService tipoPreguntaService) {
+            TipoPreguntaService tipoPreguntaService,
+            OpcionService opcionService) {
         this.preguntaService = preguntaService;
         this.encuestaService = encuestaService;
         this.tipoPreguntaService = tipoPreguntaService;
+        this.opcionService = opcionService;
 
         setSizeFull();
         setPadding(true);
@@ -135,11 +139,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva Pregunta");
 
-        //Creamos el objeto de seccionOpciones
-        List<Opcion> opcionesTemp = new ArrayList<>();
-        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp);
-        seccionOpciones.setVisible(false);
-
         // Obtenemos de la base sólo los tipos permitidos
         List<String> nombresPermitidos = Arrays.asList("Abiertas", "Cerradas", "Mixtas");
         List<TipoPregunta> tiposPermitidos = tipoPreguntaService.listarTodos().stream()
@@ -169,18 +168,24 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         comboCerradaEscalaTipo.setWidthFull();
         comboCerradaEscalaTipo.setVisible(false);
 
+
+        //Creamos el objeto de seccionOpciones
+        List<Opcion> opcionesTemp = new ArrayList<>();
+        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
+        seccionOpciones.setVisible(false);
+
+
+
         // CAMPOS COMUNES
         TextArea textoPregunta = new TextArea("Texto de la Pregunta");
         textoPregunta.setWidthFull();
         textoPregunta.setMaxLength(1000);
 
         Checkbox chkObligatoria = new Checkbox("¿Es obligatoria?");
-        TextField validacion = new TextField("Regla de Validación");
         NumberField inicioEscala = new NumberField("Valor inicio escala");
         NumberField finEscala = new NumberField("Valor fin escala");
         NumberField incremento = new NumberField("Incremento escala");
 
-        validacion.setVisible(false);
         inicioEscala.setVisible(false);
         finEscala.setVisible(false);
         incremento.setVisible(false);
@@ -191,14 +196,17 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
             if (valor != null && "Cerradas".equals(valor.getNombreTipo())) {
                 comboCerradaTipo.setVisible(true);
-            } else {
+            } else if (valor != null && "Mixtas".equals(valor.getNombreTipo())){
+                comboCerradaTipo.setVisible(false);
+                seccionOpciones.setVisible(true);
+            }
+            else {
                 comboCerradaTipo.setVisible(false);
                 seccionOpciones.setVisible(false);
             }
             comboCerradaTipo.clear();
             comboCerradaEleccionUnicaTipo.setVisible(false);
             comboCerradaEscalaTipo.setVisible(false);
-            validacion.setVisible(false);
             inicioEscala.setVisible(false);
             finEscala.setVisible(false);
             incremento.setVisible(false);
@@ -213,7 +221,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             // Primero limpiamos todo
             comboCerradaEleccionUnicaTipo.clear();
             comboCerradaEscalaTipo.clear();
-            validacion.clear();
             inicioEscala.clear();
             finEscala.clear();
             incremento.clear();
@@ -224,13 +231,12 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             // Ocultamos todo por defecto
             comboCerradaEleccionUnicaTipo.setVisible(false);
             comboCerradaEscalaTipo.setVisible(false);
-            validacion.setVisible(false);
             inicioEscala.setVisible(false);
             finEscala.setVisible(false);
             incremento.setVisible(false);
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Ahora evaluamos cada sección
@@ -259,19 +265,16 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             String valor = event.getValue();
 
             // Siempre limpiar y ocultar primero
-            validacion.clear();
-            validacion.setVisible(false);
             opcionesTemp.clear();
             seccionOpciones.removeAll();
 
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Activar campos según selección
             if ("Dicotómica".equals(valor)) {
-                validacion.setVisible(true);
                 seccionOpciones.setVisible(true);
             }
 
@@ -288,6 +291,12 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             inicioEscala.clear();
             finEscala.clear();
             incremento.clear();
+            opcionesTemp.clear();
+            seccionOpciones.removeAll();
+
+            //Cargamos nuevamente la seccion de opciones
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
+            seccionOpciones.add(nuevaSeccion);
 
             inicioEscala.setVisible(false);
             finEscala.setVisible(false);
@@ -302,10 +311,12 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
             if ("Nominal".equals(valor)) {
                 // Aquí podrías agregar futuros campos para Nominal
+                seccionOpciones.setVisible(true);
             }
 
             if ("Likert".equals(valor)) {
                 // Aquí podrías agregar futuros campos para Likert
+                seccionOpciones.setVisible(true);
             }
         });
 
@@ -316,7 +327,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 comboCerradaEscalaTipo,
                 textoPregunta,
                 chkObligatoria,
-                validacion,
                 inicioEscala,
                 finEscala,
                 incremento,
@@ -371,12 +381,17 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
             nueva.setTextoPregunta(textoPregunta.getValue());
             nueva.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
-            nueva.setValidacion(validacion.getValue());
             nueva.setValorInicioEscala(inicioEscala.getValue());
             nueva.setValorFinEscala(finEscala.getValue());
             nueva.setIncrementoEscala(incremento.getValue());
 
             preguntaService.guardar(nueva);
+
+            // Ahora guardamos las opciones si existen
+            for (Opcion opcion : opcionesTemp) {
+                opcion.setPregunta(nueva); // muy importante la relación
+                opcionService.guardar(opcion);
+            }
             dialog.close();
             actualizarGrid();
             Notification.show("Pregunta agregada correctamente.");
@@ -434,10 +449,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         obligatorio.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
         obligatorio.setReadOnly(true);
 
-        TextField validacion = new TextField("Regla de Validación");
-        validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
-        validacion.setReadOnly(true);
-
         NumberField inicio = new NumberField("Valor inicio escala");
         inicio.setValue(pregunta.getValorInicioEscala());
         inicio.setReadOnly(true);
@@ -451,7 +462,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         incremento.setReadOnly(true);
 
         VerticalLayout contenido = new VerticalLayout(
-                id, tipo, texto, obligatorio, validacion, inicio, fin, incremento);
+                id, tipo, texto, obligatorio, inicio, fin, incremento);
 
         Button cerrar = new Button("Cerrar", e -> dialog.close());
         cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -498,10 +509,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
         Checkbox chkObligatoria = new Checkbox("¿Es obligatoria?");
         chkObligatoria.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
-
-        TextField validacion = new TextField("Regla de Validación");
-        validacion.setValue(pregunta.getValidacion() != null ? pregunta.getValidacion() : "");
-        validacion.setVisible(false);
 
         NumberField inicioEscala = new NumberField("Valor inicio escala");
         inicioEscala.setValue(pregunta.getValorInicioEscala());
@@ -554,7 +561,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             comboCerradaTipo.setValue("Elección única");
             comboCerradaEleccionUnicaTipo.setVisible(true);
             comboCerradaEleccionUnicaTipo.setValue("Dicotómica");
-            validacion.setVisible(true);
         } else if (id == 9) { // Politómica
             comboTipo.setValue(tipoPreguntaService.buscarPorId(2));
             comboCerradaTipo.setVisible(true);
@@ -597,7 +603,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 comboCerradaEscalaTipo,
                 textoPregunta,
                 chkObligatoria,
-                validacion,
                 inicioEscala,
                 finEscala,
                 incremento);
@@ -610,7 +615,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
             pregunta.setTextoPregunta(textoPregunta.getValue());
             pregunta.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
-            pregunta.setValidacion(validacion.getValue());
             pregunta.setValorInicioEscala(inicioEscala.getValue());
             pregunta.setValorFinEscala(finEscala.getValue());
             pregunta.setIncrementoEscala(incremento.getValue());
@@ -631,47 +635,108 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     }
 
 
-    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp) {
+    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp, ComboBox<String> comboCerradaEleccionUnicaTipo, ComboBox<TipoPregunta> comboTipo) {
+        
         Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
         gridOpciones.setHeight("200px");
         
         gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto").setAutoWidth(true);
         gridOpciones.addColumn(Opcion::getOrden).setHeader("Correlativo").setAutoWidth(true);
+
+        Grid.Column<Opcion> columnaSeleccion = gridOpciones.addComponentColumn(opcion -> {
+        Checkbox checkOtro = new Checkbox();
+        checkOtro.setValue(opcion.getEsOtro());
+
+        checkOtro.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                for (Opcion op : opcionesTemp) {
+                    op.setesOtro(false);
+                }
+                opcion.setesOtro(true);
+                gridOpciones.getDataProvider().refreshAll();
+            } else {
+                opcion.setesOtro(false);
+            }
+        });
+
+        return checkOtro;
+        }).setHeader("Selección");
+        
+        //Visibilidad de la columna seleccion
+        columnaSeleccion.setVisible(false);
+        comboTipo.addValueChangeListener(e -> {
+            boolean esMixta = e.getValue() != null && "Mixtas".equals(e.getValue().getNombreTipo());
+            columnaSeleccion.setVisible(esMixta);
+
+        });
+        
         gridOpciones.addComponentColumn(opcion -> {
             Button eliminar = new Button(new Icon("lumo", "cross"));
             eliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
             eliminar.addClickListener(ev -> {
                 opcionesTemp.remove(opcion);
-                for (int i = 0; i < opcionesTemp.size(); i++) {
-                    opcionesTemp.get(i).setOrden(i + 1);
-                }
                 gridOpciones.setItems(opcionesTemp);
             });
             return eliminar;
         }).setHeader("Acciones");
 
         TextField textoOpcion = new TextField("Texto de opción");
-        NumberField orden = new NumberField("Correlativo");
+        IntegerField orden = new IntegerField("Correlativo");
+        orden.setMin(1);
         orden.setStep(1);
-        orden.setValue(0.0);
-        orden.setMin(0);
+        orden.setValue(1); // valor inicial
+        orden.setWidth("150px");
+
+        // Forzamos el atributo type="number" para habilitar las flechitas:
+        orden.getElement().setAttribute("type", "number");
 
         Button btnAgregarOpcion = new Button("Agregar Opción", e -> {
             if (textoOpcion.isEmpty()) {
-                Notification.show("Ingrese texto de opción");
+                Notification.show("Debe ingresar el texto de la opción.", 3000, Notification.Position.MIDDLE);
                 return;
             }
+
+            if (orden.isEmpty()) {
+                Notification.show("Debe ingresar el número de orden.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            int ordenIngresado = orden.getValue().intValue();
+
+            if (ordenIngresado < 1) {
+                Notification.show("El orden debe ser un número entero mayor o igual a 1.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            boolean yaExiste = opcionesTemp.stream()
+                    .anyMatch(op -> op.getOrden() != null && op.getOrden().equals(ordenIngresado));
+
+            if (yaExiste) {
+                Notification.show("El orden ingresado ya está asignado a otra opción.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            // Validación de máximo 2 cuando es Dicotómica
+            if ("Dicotómica".equals(comboCerradaEleccionUnicaTipo.getValue()) && opcionesTemp.size() >= 2) {
+                Notification.show("Solo puede ingresar máximo 2 opciones para preguntas dicotómicas");
+                return;
+            }
+
             Opcion nueva = new Opcion();
             nueva.setTextoOpcion(textoOpcion.getValue());
-            nueva.setOrden(orden.getValue().intValue());
-            nueva.setOrden(opcionesTemp.size() + 1);
+            nueva.setOrden(ordenIngresado);
             opcionesTemp.add(nueva);
             gridOpciones.setItems(opcionesTemp);
+
             textoOpcion.clear();
-            orden.setValue(0.0);
+            orden.setValue(1);
         });
 
-        VerticalLayout seccion = new VerticalLayout(textoOpcion, orden, btnAgregarOpcion, gridOpciones);
+        HorizontalLayout filaBoton = new HorizontalLayout(btnAgregarOpcion);
+        filaBoton.setWidthFull();
+        filaBoton.setJustifyContentMode(JustifyContentMode.END);
+
+        VerticalLayout seccion = new VerticalLayout( textoOpcion, orden, filaBoton, gridOpciones);
         seccion.setPadding(false);
         seccion.setSpacing(false);
         seccion.getStyle().set("border", "1px solid #ddd").set("padding", "10px");

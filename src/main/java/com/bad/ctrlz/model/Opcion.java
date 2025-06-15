@@ -33,14 +33,18 @@ public class Opcion {
     @Column(name = "orden")
     private Integer orden;
 
-    public Opcion() { }
+    @Column(name = "es_otro")
+    private Boolean esOtro = false;
+
+    public Opcion() {
+    }
 
     public Opcion(Integer idOpcion, Pregunta pregunta, String textoOpcion, Integer valorEscala, Integer orden) {
-        this.idOpcion    = idOpcion;
-        this.pregunta    = pregunta;
+        this.idOpcion = idOpcion;
+        this.pregunta = pregunta;
         this.textoOpcion = textoOpcion;
         this.valorEscala = valorEscala;
-        this.orden       = orden;
+        this.orden = orden;
     }
 
     public Integer getIdOpcion() {
@@ -81,5 +85,13 @@ public class Opcion {
 
     public void setOrden(Integer orden) {
         this.orden = orden;
+    }
+
+    public Boolean getEsOtro() {
+        return esOtro != null ? esOtro : false;
+    }
+
+    public void setesOtro(boolean esOtro) {
+        this.esOtro = esOtro;
     }
 }

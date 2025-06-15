@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -31,13 +32,11 @@ public class DashboardEncuestasView extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        // Botón de crear encuesta
         Button crearBtn = new Button("Crear Encuesta", e -> getUI().ifPresent(ui -> ui.navigate("crear-encuesta")));
         crearBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         crearBtn.getStyle().set("margin-bottom", "20px").set("font-weight", "bold");
 
         H2 titulo = new H2("Gestión de Encuestas");
-
         add(crearBtn, titulo);
         cargarEncuestas();
     }
@@ -57,15 +56,10 @@ public class DashboardEncuestasView extends VerticalLayout {
 
     private Div crearCard(Encuesta encuesta) {
         Div card = new Div();
-        card.getStyle().set("padding", "20px");
-        card.getStyle().set("margin-bottom", "20px");
-        card.getStyle().set("border-radius", "10px");
-        card.getStyle().set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)");
-        card.getStyle().set("background-color", "#FFFFFF");
-        card.getStyle().set("width", "80%");
-        card.getStyle().set("max-width", "800px");
-        card.getStyle().set("margin-left", "auto");
-        card.getStyle().set("margin-right", "auto");
+        card.getStyle().set("padding", "20px").set("margin-bottom", "20px")
+                .set("border-radius", "10px").set("box-shadow", "0 4px 8px rgba(0,0,0,0.1)")
+                .set("background-color", "#FFFFFF").set("width", "80%")
+                .set("max-width", "800px").set("margin-left", "auto").set("margin-right", "auto");
 
         Span titulo = new Span("Título: " + encuesta.getTitulo());
         Span objetivo = new Span("Objetivo: " + encuesta.getObjetivo());
@@ -87,12 +81,14 @@ public class DashboardEncuestasView extends VerticalLayout {
         Button editar = new Button("Editar", e -> editarEncuesta(encuesta));
         Button eliminar = new Button("Eliminar", e -> confirmarEliminar(encuesta));
         Button agregarPreguntas = new Button("Agregar Preguntas", e -> agregarPreguntas(encuesta));
+        Button generarLink = new Button("Generar Link", e -> generarLinkEncuesta(encuesta));
 
         editar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         eliminar.addThemeVariants(ButtonVariant.LUMO_ERROR);
         agregarPreguntas.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        generarLink.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
 
-        HorizontalLayout acciones = new HorizontalLayout(editar, eliminar, agregarPreguntas);
+        HorizontalLayout acciones = new HorizontalLayout(editar, eliminar, agregarPreguntas, generarLink);
         acciones.setSpacing(true);
         return acciones;
     }
@@ -102,8 +98,8 @@ public class DashboardEncuestasView extends VerticalLayout {
     }
 
     private void agregarPreguntas(Encuesta encuesta) {
-        Integer id = encuesta.getIdEncuesta(); 
-        getUI().ifPresent(ui -> ui.navigate( + id + "/preguntas"));
+        Integer id = encuesta.getIdEncuesta();
+        getUI().ifPresent(ui -> ui.navigate(id + "/preguntas"));
     }
 
     private void confirmarEliminar(Encuesta encuesta) {
@@ -114,7 +110,7 @@ public class DashboardEncuestasView extends VerticalLayout {
             encuestaService.eliminar(encuesta);
             confirmDialog.close();
             Notification.show("Encuesta eliminada correctamente", 3000, Notification.Position.TOP_CENTER);
-            getUI().ifPresent(ui -> ui.getPage().reload()); // Esto recarga la página completa
+            getUI().ifPresent(ui -> ui.getPage().reload());
         });
 
         confirmar.addThemeVariants(ButtonVariant.LUMO_ERROR);
@@ -125,4 +121,60 @@ public class DashboardEncuestasView extends VerticalLayout {
         confirmDialog.open();
     }
 
+    private void generarLinkEncuesta(Encuesta encuesta) {
+        String baseUrl = "http://localhost:8081/public/encuesta/";
+
+        // Si ya tiene un link generado, lo usamos
+        if (encuesta.getLinkPublico() != null && !encuesta.getLinkPublico().isEmpty()) {
+            mostrarDialogoLink(baseUrl + encuesta.getLinkPublico());
+        } else {
+            // Generamos un UUID nuevo
+            String nuevoLink = java.util.UUID.randomUUID().toString();
+            encuesta.setLinkPublico(nuevoLink);
+            encuestaService.actualizar(encuesta);
+            mostrarDialogoLink(baseUrl + nuevoLink);
+        }
+    }
+
+    private void mostrarDialogoLink(String link) {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Link generado");
+
+        Span label = new Span("Este es el link de acceso público:");
+        TextField linkField = new TextField();
+        linkField.setValue(link);
+        linkField.setReadOnly(true);
+        linkField.setWidthFull();
+
+        Button copiarBtn = new Button("Copiar");
+        copiarBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        copiarBtn.addClickListener(e -> {
+            linkField.getElement().executeJs(
+                    "navigator.clipboard.writeText($0).then(function() {" +
+                            "  $1.$server.copied();" +
+                            "});",
+                    linkField.getValue(), copiarBtn);
+        });
+
+        // Agregamos feedback visual en el servidor (opcional)
+        copiarBtn.getElement().setProperty("serverOnly", true);
+        copiarBtn.getElement().addPropertyChangeListener("copied", e -> {
+            copiarBtn.setText("¡Copiado!");
+        });
+
+        // Alternativamente, mucho más simple:
+        copiarBtn.addClickListener(e -> {
+            linkField.getElement().executeJs("navigator.clipboard.writeText($0);", linkField.getValue());
+            copiarBtn.setText("¡Copiado!");
+        });
+
+        Button cerrar = new Button("Cerrar", e -> dialog.close());
+        cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        HorizontalLayout botones = new HorizontalLayout(copiarBtn, cerrar);
+        botones.setSpacing(true);
+
+        dialog.add(label, linkField, botones);
+        dialog.open();
+    }
 }
