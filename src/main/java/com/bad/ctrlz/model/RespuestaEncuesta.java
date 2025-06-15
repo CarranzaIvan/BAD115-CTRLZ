@@ -14,10 +14,12 @@ public class RespuestaEncuesta {
     @JoinColumn(name = "id_encuesta", nullable = false)
     private Encuesta encuesta;
 
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
+
     @Column(name = "fecha_envio", nullable = false)
     private LocalDateTime fechaEnvio;
-
-    // Eliminamos el campo usuario
 
     public RespuestaEncuesta() {
         this.fechaEnvio = LocalDateTime.now();
@@ -37,6 +39,14 @@ public class RespuestaEncuesta {
 
     public void setEncuesta(Encuesta encuesta) {
         this.encuesta = encuesta;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public LocalDateTime getFechaEnvio() {

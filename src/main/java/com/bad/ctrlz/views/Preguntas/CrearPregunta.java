@@ -338,7 +338,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 return;
             }
 
-            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(idEncuesta);
+            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(Long.valueOf(idEncuesta));
             if (encuestaOpt.isEmpty()) {
                 Notification.show("Encuesta no encontrada.", 3000, Notification.Position.MIDDLE);
                 return;

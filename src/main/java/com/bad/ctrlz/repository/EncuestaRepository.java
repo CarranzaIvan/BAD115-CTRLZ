@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface EncuestaRepository extends JpaRepository<Encuesta, Long> {
 
     @Query("""
-        SELECT e, COUNT(DISTINCT re.usuario.id)
+        SELECT e, COUNT(re)
         FROM Encuesta e
         LEFT JOIN e.preguntas p
         LEFT JOIN p.respuestas r

@@ -4,9 +4,9 @@ public class RespuestaIndividualDTO {
     private String nombreUsuario;
     private String respuesta;
 
-    public RespuestaIndividualDTO(String nombreUsuario, String respuesta) {
-        this.nombreUsuario = nombreUsuario;
-        this.respuesta = respuesta;
+    public RespuestaIndividualDTO(String nombre, Object respuesta) {
+        this.nombreUsuario = nombre;
+        this.respuesta = respuesta != null ? respuesta.toString() : null;
     }
 
     public String getNombreUsuario() {
