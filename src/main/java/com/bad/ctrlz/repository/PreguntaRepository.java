@@ -1,5 +1,6 @@
 package com.bad.ctrlz.repository;
 
+import com.bad.ctrlz.dto.PreguntaDetalleDTO;
 import com.bad.ctrlz.model.Pregunta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,11 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Integer> {
     @Query("SELECT p FROM Pregunta p JOIN FETCH p.tipoPregunta WHERE p.encuesta.idEncuesta = :idEncuesta")
     List<Pregunta> findByEncuestaConTipoPregunta(@Param("idEncuesta") Integer idEncuesta);
 
+    @Query("""
+    SELECT new com.bad.ctrlz.dto.PreguntaDetalleDTO(p.idPregunta, p.textoPregunta, tp.nombreTipo)
+    FROM Pregunta p
+    JOIN p.tipoPregunta tp
+    WHERE p.encuesta.idEncuesta = :idEncuesta
+    """)
+    List<PreguntaDetalleDTO> obtenerPreguntasPorEncuesta(Long idEncuesta);
 }
