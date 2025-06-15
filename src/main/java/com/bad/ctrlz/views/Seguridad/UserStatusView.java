@@ -1,9 +1,12 @@
 package com.bad.ctrlz.views.Seguridad;
+
+import com.bad.ctrlz.model.Usuario;
 import com.bad.ctrlz.service.UsuarioService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -11,18 +14,17 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 
 @PageTitle("Gestión de Estados de Usuario")
 @Route(value = "estado-usuario")
@@ -30,17 +32,18 @@ public class UserStatusView extends VerticalLayout {
 
     @Autowired
     private UsuarioService usuarioService;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    private Grid<UserData> grid;
+    private Grid<Usuario> grid;
 
     public UserStatusView(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
         setSizeFull();
         setPadding(false);
         setSpacing(false);
-        
+
         // Aplicar el fondo oscuro como en la imagen
-        
+
         add(createHeader());
         add(createMainContent());
     }
@@ -52,7 +55,7 @@ public class UserStatusView extends VerticalLayout {
         header.setAlignItems(Alignment.CENTER);
         header.setPadding(true);
         header.setSpacing(true);
-        
+
         // Estilo del header exactamente como en la imagen
         header.getStyle().set("background", "#2d3441");
         header.getStyle().set("border-bottom", "1px solid #4a5568");
@@ -93,15 +96,18 @@ public class UserStatusView extends VerticalLayout {
         mainContent.setPadding(true);
         mainContent.setSpacing(true);
         mainContent.getStyle().set("padding", "24px");
-        
+
         mainContent.add(createStatsCards());
         mainContent.add(createUserListCard());
-        
+
         return mainContent;
     }
 
     private Component createStatsCards() {
         HorizontalLayout statsLayout = new HorizontalLayout();
+        statsLayout.getStyle().set("max-width", "1250px")
+                .set("margin-left", "auto")
+                .set("margin-right", "auto");
         statsLayout.setWidthFull();
         statsLayout.setSpacing(true);
         statsLayout.setPadding(false);
@@ -110,16 +116,15 @@ public class UserStatusView extends VerticalLayout {
         statsLayout.getStyle().set("margin-bottom", "24px");
 
         // Estadisticas de usuario
-        String activos = Integer.toString(usuarioService.obtenerActivos()); 
+        String activos = Integer.toString(usuarioService.obtenerActivos());
         String bloqueados = Integer.toString(usuarioService.obtenerBloqueados());
         String inactivos = Integer.toString(usuarioService.obtenerInactivos());
-        
+
         // Datos estáticos temporales
         statsLayout.add(
-            createStatCard(activos, "Usuarios Activos", "success"),
-            createStatCard(inactivos, "Usuarios Inactivos", "contrast"),
-            createStatCard(bloqueados, "Usuarios Bloqueados", "error")
-        );
+                createStatCard(activos, "Usuarios Activos", "success"),
+                createStatCard(inactivos, "Usuarios Inactivos", "contrast"),
+                createStatCard(bloqueados, "Usuarios Bloqueados", "error"));
 
         return statsLayout;
     }
@@ -127,7 +132,7 @@ public class UserStatusView extends VerticalLayout {
     private Component createStatCard(String value, String title, String theme) {
         Div card = new Div();
         card.setWidthFull();
-        
+
         // Estilo de la tarjeta exactamente como en la imagen
         card.getStyle().set("background", "#ffffff");
         card.getStyle().set("border-radius", "12px");
@@ -152,7 +157,7 @@ public class UserStatusView extends VerticalLayout {
         iconContainer.getStyle().set("display", "flex");
         iconContainer.getStyle().set("align-items", "center");
         iconContainer.getStyle().set("justify-content", "center");
-        
+
         Icon icon = null;
         if ("success".equals(theme)) {
             icon = VaadinIcon.CHECK_CIRCLE.create();
@@ -182,7 +187,7 @@ public class UserStatusView extends VerticalLayout {
         valueSpan.getStyle().set("font-size", "28px");
         valueSpan.getStyle().set("font-weight", "700");
         valueSpan.getStyle().set("line-height", "1");
-        
+
         if ("success".equals(theme)) {
             valueSpan.getStyle().set("color", "#10b981");
         } else if ("error".equals(theme)) {
@@ -206,7 +211,10 @@ public class UserStatusView extends VerticalLayout {
     private Component createUserListCard() {
         Div listCard = new Div();
         listCard.setSizeFull();
-        
+        listCard.getStyle().set("max-width", "1250px")
+                .set("margin-left", "auto")
+                .set("margin-right", "auto");
+
         // Estilo de la tarjeta principal
         listCard.getStyle().set("background", "#ffffff");
         listCard.getStyle().set("border-radius", "12px");
@@ -218,7 +226,6 @@ public class UserStatusView extends VerticalLayout {
         listContainer.setSizeFull();
         listContainer.setPadding(false);
         listContainer.setSpacing(true);
-        listContainer.getStyle().set("gap", "16px");
 
         // Título y descripción
         H2 listTitle = new H2("Lista de Usuarios");
@@ -233,9 +240,9 @@ public class UserStatusView extends VerticalLayout {
         description.getStyle().set("font-size", "14px");
 
         // Grid de usuarios
-        grid = new Grid<>(UserData.class, false);
+        grid = new Grid<>(Usuario.class, false);
         grid.setSizeFull();
-        
+
         setupGrid();
         loadGridData();
 
@@ -245,119 +252,97 @@ public class UserStatusView extends VerticalLayout {
     }
 
     private void setupGrid() {
-        // Estilo del grid para coincidir con la imagen
+        // Estilos generales del grid
         grid.addThemeNames("no-border", "no-row-borders");
         grid.getStyle().set("background", "transparent");
         grid.getStyle().set("--lumo-contrast-10pct", "#f8fafc");
+        grid.setSizeFull();
 
-        // Columna Usuario
-        grid.addColumn(UserData::getName)
-            .setHeader("Usuario")
-            .setFlexGrow(1)
-            .setWidth("200px");
+        // Columna: Usuario (Nombre completo)
+        grid.addColumn(usuario -> usuario.getNombre() + " " + usuario.getApellido())
+                .setHeader("Usuario")
+                .setAutoWidth(true)
+                .setFlexGrow(1);
 
-        // Columna Email
-        grid.addColumn(UserData::getEmail)
-            .setHeader("Email")
-            .setFlexGrow(2)
-            .setWidth("250px");
+        // Columna: Correo Electrónico
+        grid.addColumn(Usuario::getCorreo)
+                .setHeader("Email")
+                .setAutoWidth(true)
+                .setFlexGrow(1);
 
-        // Columna Estado
+        // Columna: Estado (badge visual)
         grid.addComponentColumn(this::createStatusBadge)
-            .setHeader("Estado")
-            .setFlexGrow(0)
-            .setWidth("120px");
+                .setHeader("Estado")
+                .setAutoWidth(true)
+                .setFlexGrow(0);
 
-        // Columna Último Acceso
-        grid.addColumn(user -> user.getLastAccess().toString())
-            .setHeader("Último Acceso")
-            .setFlexGrow(1)
-            .setWidth("140px");
+        // Columna: Fecha de Registro
+        grid.addColumn(usuario -> formatDateTime(usuario.getFechaCreacion()))
+                .setHeader("Fecha de Registro")
+                .setAutoWidth(true)
+                .setFlexGrow(0);
 
-        // Columna Fecha de Registro
-        grid.addColumn(user -> user.getRegistrationDate().toString())
-            .setHeader("Fecha de Registro")
-            .setFlexGrow(1)
-            .setWidth("160px");
+        // Columna: Última Actualización
+        grid.addColumn(usuario -> formatDateTime(usuario.getFechaActualizacion()))
+                .setHeader("Última Actualización")
+                .setAutoWidth(true)
+                .setFlexGrow(0);
 
-        // Columna Acciones
+        // Columna: Acciones (botones)
         grid.addComponentColumn(this::createActionButtons)
-            .setHeader("Acciones")
-            .setFlexGrow(0)
-            .setWidth("150px");
+                .setHeader("Acciones")
+                .setAutoWidth(true)
+                .setFlexGrow(0);
 
-        // Aplicar estilos de header de manera segura
-        grid.getElement().executeJs(
-            "this.shadowRoot.querySelectorAll('[part=\"header-cell\"]').forEach(cell => {" +
-            "  cell.style.background = '#f8fafc';" +
-            "  cell.style.color = '#374151';" +
-            "  cell.style.fontWeight = '600';" +
-            "  cell.style.fontSize = '13px';" +
-            "  cell.style.padding = '12px 16px';" +
-            "});"
-        );
+        // Estilo para headers: fondo claro, texto oscuro
+        grid.getElement().executeJs("""
+                    this.shadowRoot.querySelectorAll('[part="header-cell"]').forEach(cell => {
+                        cell.style.background = '#f8fafc';
+                        cell.style.color = '#1f2937'; // gris oscuro para mejor contraste
+                        cell.style.fontWeight = '600';
+                        cell.style.fontSize = '13px';
+                        cell.style.padding = '12px 16px';
+                    });
+                """);
     }
 
-    private Component createStatusBadge(UserData user) {
+    private Component createStatusBadge(Usuario usuario) {
         Span badge = new Span();
-        badge.getStyle().set("display", "inline-flex");
-        badge.getStyle().set("align-items", "center");
-        badge.getStyle().set("gap", "6px");
-        badge.getStyle().set("padding", "4px 12px");
-        badge.getStyle().set("border-radius", "16px");
-        badge.getStyle().set("font-size", "12px");
-        badge.getStyle().set("font-weight", "600");
-        badge.getStyle().set("text-transform", "none");
-        
-        Icon statusIcon;
-        
-        switch (user.getStatus()) {
-            case ACTIVE:
-                badge.setText("Activo");
-                badge.getStyle().set("background", "#d1fae5");
-                badge.getStyle().set("color", "#065f46");
-                statusIcon = VaadinIcon.CHECK_CIRCLE.create();
-                statusIcon.setSize("12px");
-                statusIcon.getStyle().set("color", "#10b981");
-                badge.add(statusIcon);
-                break;
-            case INACTIVE:
-                badge.setText("Inactivo");
-                badge.getStyle().set("background", "#f3f4f6");
-                badge.getStyle().set("color", "#374151");
-                statusIcon = VaadinIcon.USER.create();
-                statusIcon.setSize("12px");
-                statusIcon.getStyle().set("color", "#6b7280");
-                badge.add(statusIcon);
-                break;
-            case BLOCKED:
-                badge.setText("Bloqueado");
-                badge.getStyle().set("background", "#fee2e2");
-                badge.getStyle().set("color", "#991b1b");
-                statusIcon = VaadinIcon.BAN.create();
-                statusIcon.setSize("12px");
-                statusIcon.getStyle().set("color", "#ef4444");
-                badge.add(statusIcon);
-                break;
+        badge.getStyle()
+                .set("padding", "4px 8px")
+                .set("border-radius", "12px")
+                .set("font-size", "12px")
+                .set("font-weight", "600")
+                .set("color", "white");
+
+        if (usuario.isAccountLocked()) {
+            badge.setText("Bloqueado");
+            badge.getStyle().set("background-color", "#ef4444"); // rojo
+        } else if (!usuario.isEnabled()) {
+            badge.setText("Inactivo");
+            badge.getStyle().set("background-color", "#f59e0b"); // ámbar
+        } else {
+            badge.setText("Activo");
+            badge.getStyle().set("background-color", "#10b981"); // verde
         }
-        
+
         return badge;
     }
 
-    private Component createActionButtons(UserData user) {
+    private Component createActionButtons(Usuario usuario) {
         HorizontalLayout actions = new HorizontalLayout();
         actions.setSpacing(true);
         actions.setPadding(false);
 
-        if (user.getStatus() == UserStatus.BLOCKED) {
-            // Para usuarios bloqueados, mostrar texto estático
+        if (usuario.isAccountLocked()) {
+            // Usuario bloqueado
             Span blockedText = new Span("Usuario bloqueado");
             blockedText.getStyle().set("color", "#6b7280");
             blockedText.getStyle().set("font-size", "12px");
             blockedText.getStyle().set("font-style", "italic");
             actions.add(blockedText);
         } else {
-            // Botón de activar/desactivar con estilo exacto de la imagen
+            // Botón de acción con modal de confirmación
             Button actionButton = new Button();
             actionButton.addThemeVariants(ButtonVariant.LUMO_SMALL, ButtonVariant.LUMO_TERTIARY);
             actionButton.getStyle().set("display", "inline-flex");
@@ -369,129 +354,95 @@ public class UserStatusView extends VerticalLayout {
             actionButton.getStyle().set("border-radius", "6px");
             actionButton.getStyle().set("font-size", "12px");
             actionButton.getStyle().set("font-weight", "500");
-            
-            if (user.getStatus() == UserStatus.ACTIVE) {
-                actionButton.setText("Desactivar");
-                actionButton.setIcon(VaadinIcon.USER_CLOCK.create());
-                actionButton.getStyle().set("color", "#6b7280");
-                actionButton.addClickListener(e -> toggleUserStatus(user, UserStatus.INACTIVE));
-            } else {
-                actionButton.setText("Activar");
-                actionButton.setIcon(VaadinIcon.USER_CHECK.create());
-                actionButton.getStyle().set("color", "#6b7280");
-                actionButton.addClickListener(e -> toggleUserStatus(user, UserStatus.ACTIVE));
-            }
-            
-            // Hover effect
+            actionButton.getStyle().set("color", "#6b7280");
+
+            boolean isActivo = usuario.isEnabled();
+
+            actionButton.setText(isActivo ? "Desactivar" : "Activar");
+            actionButton.setIcon(isActivo ? VaadinIcon.USER_CLOCK.create() : VaadinIcon.USER_CHECK.create());
+
+            actionButton.addClickListener(e -> {
+                String mensaje = isActivo
+                        ? "¿Estás seguro de desactivar al usuario " + usuario.getNombre() + " " + usuario.getApellido()
+                                + "?"
+                        : "¿Estás seguro de activar al usuario " + usuario.getNombre() + " " + usuario.getApellido()
+                                + "?";
+
+                showConfirmationDialog(mensaje, () -> toggleUserStatus(usuario, !isActivo));
+            });
+
+            // Hover
             actionButton.getElement().addEventListener("mouseenter", e -> {
                 actionButton.getStyle().set("background", "#f3f4f6");
             });
             actionButton.getElement().addEventListener("mouseleave", e -> {
                 actionButton.getStyle().set("background", "transparent");
             });
-            
+
             actions.add(actionButton);
         }
 
         return actions;
     }
 
-    private void toggleUserStatus(UserData user, UserStatus newStatus) {
-        // TODO: Implementar el cambio de estado a través del servicio
-        // try {
-        //     userService.updateUserStatus(user.getId(), newStatus);
-        //     user.setStatus(newStatus);
-        //     grid.getDataProvider().refreshItem(user);
-        //     
-        //     String message = newStatus == UserStatus.ACTIVE ? 
-        //         "Usuario activado correctamente" : "Usuario desactivado correctamente";
-        //     Notification.show(message, 3000, Notification.Position.TOP_CENTER);
-        // } catch (Exception e) {
-        //     Notification.show("Error al cambiar el estado del usuario", 3000, Notification.Position.TOP_CENTER);
-        // }
+    private void toggleUserStatus(Usuario usuario, boolean nuevoEstado) {
+        try {
+            usuario.setEnabled(nuevoEstado);
+            usuarioService.actualizarUsuario(usuario); // <-- método que debes tener en tu servicio
 
-        // Implementación temporal para demostración
-        user.setStatus(newStatus);
-        grid.getDataProvider().refreshItem(user);
-        
-        String message = newStatus == UserStatus.ACTIVE ? 
-            "Usuario activado correctamente" : "Usuario desactivado correctamente";
-        Notification.show(message, 3000, Notification.Position.TOP_CENTER);
+            grid.getDataProvider().refreshItem(usuario);
+
+            String mensaje = nuevoEstado ? "Usuario activado correctamente"
+                    : "Usuario desactivado correctamente";
+            Notification.show(mensaje, 3000, Notification.Position.TOP_CENTER);
+        } catch (Exception e) {
+            Notification.show("Error al cambiar el estado del usuario", 3000, Notification.Position.TOP_CENTER);
+        }
     }
 
     private void loadGridData() {
-        // TODO: Cargar datos reales desde tu servicio
-        // List<UserData> users = userService.getAllUsers();
-        // grid.setItems(users);
-
-        // Datos estáticos temporales
-        List<UserData> staticUsers = createStaticUserData();
-        grid.setItems(staticUsers);
+        grid.setItems(usuarioService.obtenerUsuarios());
     }
 
-    // Método temporal para datos estáticos
-    private List<UserData> createStaticUserData() {
-        List<UserData> users = new ArrayList<>();
-        
-        users.add(new UserData(1L, "Ana García", "ana.garcia@email.com", 
-            UserStatus.ACTIVE, LocalDate.of(2024, 1, 15), LocalDate.of(2023, 6, 10)));
-        
-        users.add(new UserData(2L, "Carlos López", "carlos.lopez@email.com", 
-            UserStatus.INACTIVE, LocalDate.of(2024, 1, 10), LocalDate.of(2023, 8, 15)));
-        
-        users.add(new UserData(3L, "María Rodríguez", "maria.rodriguez@email.com", 
-            UserStatus.BLOCKED, LocalDate.of(2024, 1, 5), LocalDate.of(2023, 9, 20)));
-        
-        users.add(new UserData(4L, "Juan Martínez", "juan.martinez@email.com", 
-            UserStatus.ACTIVE, LocalDate.of(2024, 1, 14), LocalDate.of(2023, 7, 25)));
-        
-        users.add(new UserData(5L, "Laura Fernández", "laura.fernandez@email.com", 
-            UserStatus.INACTIVE, LocalDate.of(2024, 1, 12), LocalDate.of(2023, 5, 18)));
-        
-        return users;
+    private String formatDateTime(LocalDateTime dateTime) {
+        if (dateTime == null)
+            return "N/A";
+        return dateTime.format(formatter);
     }
 
-    // Clase interna para los datos de usuario (muévela a un paquete separado)
-    public static class UserData {
-        private Long id;
-        private String name;
-        private String email;
-        private UserStatus status;
-        private LocalDate lastAccess;
-        private LocalDate registrationDate;
+    private void showConfirmationDialog(String message, Runnable onConfirm) {
+        Dialog dialog = new Dialog();
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(false);
 
-        public UserData(Long id, String name, String email, UserStatus status, 
-                       LocalDate lastAccess, LocalDate registrationDate) {
-            this.id = id;
-            this.name = name;
-            this.email = email;
-            this.status = status;
-            this.lastAccess = lastAccess;
-            this.registrationDate = registrationDate;
-        }
+        VerticalLayout content = new VerticalLayout();
+        content.setPadding(true);
+        content.setSpacing(true);
+        content.setAlignItems(FlexComponent.Alignment.CENTER); // Centra todo el contenido horizontalmente
 
-        // Getters y setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-        
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
-        
-        public UserStatus getStatus() { return status; }
-        public void setStatus(UserStatus status) { this.status = status; }
-        
-        public LocalDate getLastAccess() { return lastAccess; }
-        public void setLastAccess(LocalDate lastAccess) { this.lastAccess = lastAccess; }
-        
-        public LocalDate getRegistrationDate() { return registrationDate; }
-        public void setRegistrationDate(LocalDate registrationDate) { this.registrationDate = registrationDate; }
+        Span text = new Span(message);
+        text.getStyle()
+                .set("font-size", "14px")
+                .set("color", "#374151");
+
+        HorizontalLayout buttons = new HorizontalLayout();
+        buttons.setSpacing(true);
+        buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER); // Centrar botones
+        buttons.setWidthFull(); // Ocupa todo el ancho disponible
+
+        Button confirmBtn = new Button("Confirmar", e -> {
+            onConfirm.run(); // Ejecutar la acción pasada como lambda
+            dialog.close();
+        });
+        confirmBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        Button cancelBtn = new Button("Cancelar", e -> dialog.close());
+
+        buttons.add(confirmBtn, cancelBtn);
+        content.add(text, buttons);
+
+        dialog.add(content);
+        dialog.open();
     }
 
-    // Enum para los estados de usuario
-    public enum UserStatus {
-        ACTIVE, INACTIVE, BLOCKED
-    }
 }

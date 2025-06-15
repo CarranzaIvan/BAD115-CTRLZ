@@ -1,6 +1,7 @@
 package com.bad.ctrlz.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,6 +119,18 @@ public class UsuarioService {
     public Integer obtenerInactivos() {
         Integer inactivos = usuarioRepository.contarUsuariosDesactivados();
         return inactivos;
+    }
+
+    /*
+     * Obtener listado de usuarios
+     */
+    public List<Usuario> obtenerUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios;
+    }
+
+    public void actualizarUsuario(Usuario usuario) {
+        usuarioRepository.save(usuario);
     }
 
 }
