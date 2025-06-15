@@ -28,8 +28,25 @@ public class DetalleResultadosView extends VerticalLayout implements BeforeEnter
         setSizeFull();
         setPadding(true);
         setSpacing(true);
-        add(new H2("Preguntas de la Encuesta"), grid);
+
+        H2 titulo = new H2("Preguntas de la Encuesta");
+        add(titulo, grid); // se mantiene igual
+
+        // Botones de navegación al final
+        Button btnVolver = new Button("Volver", e ->
+            getUI().ifPresent(ui -> ui.getPage().getHistory().back())
+        );
+
+        Button btnDashboard = new Button("Ir a Dashboard", e ->
+            getUI().ifPresent(ui -> ui.navigate("dashboard-respuestas"))
+        );
+
+        HorizontalLayout navegacion = new HorizontalLayout(btnVolver, btnDashboard);
+        navegacion.setSpacing(true);
+
+        add(navegacion);
     }
+
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -48,16 +65,26 @@ public class DetalleResultadosView extends VerticalLayout implements BeforeEnter
             verRespuestas.addClickListener(e ->
                 getUI().ifPresent(ui -> ui.navigate("ver-respuestas/" + p.getIdPregunta()))
             );
+            acciones.add(verRespuestas);
 
-            Button verGrafico = new Button("Ver gráfico");
-            verGrafico.addClickListener(e ->
-                getUI().ifPresent(ui -> ui.navigate("ver-grafico/" + p.getIdPregunta()))
-            );
+            // Mostrar botones de gráficos solo si la pregunta no es abierta
+            if (!"Abiertas".equalsIgnoreCase(p.getTipoPregunta())) {
+                Button verGraficoBar = new Button("Gráfico de Barras");
+                verGraficoBar.addClickListener(e ->
+                    getUI().ifPresent(ui -> ui.navigate("ver-grafico-barras/" + p.getIdPregunta()))
+                );
 
-            acciones.add(verRespuestas, verGrafico);
+                Button verGraficoPie = new Button("Gráfico de Pastel");
+                verGraficoPie.addClickListener(e ->
+                    getUI().ifPresent(ui -> ui.navigate("ver-grafico-pastel/" + p.getIdPregunta()))
+                );
+
+                acciones.add(verGraficoBar, verGraficoPie);
+            }
+
             return acciones;
         }).setHeader("Acciones");
 
-        grid.setItems(preguntas);
-    }
+            grid.setItems(preguntas);
+        }
 }

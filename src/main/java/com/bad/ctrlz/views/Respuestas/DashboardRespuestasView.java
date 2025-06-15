@@ -5,6 +5,7 @@ import com.bad.ctrlz.service.EncuestaService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -31,10 +32,23 @@ public class DashboardRespuestasView extends VerticalLayout {
         setSpacing(true);
 
         H2 titulo = new H2("Dashboard de Respuestas por Encuesta");
-        add(titulo, configurarGrid());
+
+        // Botones de navegación
+        Button btnVolver = new Button("Volver", e ->
+            getUI().ifPresent(ui -> ui.getPage().getHistory().back())
+        );
+
+        Button btnInicio = new Button("Ir a Inicio", e ->
+            getUI().ifPresent(ui -> ui.navigate(""))
+        );
+
+        HorizontalLayout navegacion = new HorizontalLayout(btnVolver, btnInicio);
+        navegacion.setSpacing(true);
 
         cargarDatos();
+        add(navegacion, titulo, configurarGrid());
     }
+
 
     private Grid<DashboardEncuestaDTO> configurarGrid() {
     grid.addColumn(DashboardEncuestaDTO::getIdEncuesta)
