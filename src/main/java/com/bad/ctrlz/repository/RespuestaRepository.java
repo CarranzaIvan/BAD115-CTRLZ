@@ -59,5 +59,4 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Integer> {
         """)
     List<GraficoPreguntaDTO> obtenerConteoPorRespuesta(Integer idPregunta);
 
-
 }

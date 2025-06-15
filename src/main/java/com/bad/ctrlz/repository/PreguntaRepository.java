@@ -13,6 +13,7 @@ import java.util.List;
 public interface PreguntaRepository extends JpaRepository<Pregunta, Integer> {
 
     // Lista todas las preguntas asociadas a una encuesta específica
+    
     List<Pregunta> findByEncuesta_IdEncuesta(Integer idEncuesta);
 
     @Query("SELECT p FROM Pregunta p JOIN FETCH p.tipoPregunta WHERE p.encuesta.idEncuesta = :idEncuesta")
@@ -25,4 +26,6 @@ public interface PreguntaRepository extends JpaRepository<Pregunta, Integer> {
     WHERE p.encuesta.idEncuesta = :idEncuesta
     """)
     List<PreguntaDetalleDTO> obtenerPreguntasPorEncuesta(Long idEncuesta);
+    //LISTA
+    List<Pregunta> findByEncuestaIdEncuesta(Integer idEncuesta);
 }

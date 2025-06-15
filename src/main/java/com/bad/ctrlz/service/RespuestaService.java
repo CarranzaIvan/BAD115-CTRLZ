@@ -1,5 +1,4 @@
 package com.bad.ctrlz.service;
-
 import com.bad.ctrlz.dto.GraficoPreguntaDTO;
 import com.bad.ctrlz.dto.RespuestaIndividualDTO;
 import com.bad.ctrlz.model.Pregunta;
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RespuestaService {
@@ -37,6 +37,13 @@ public class RespuestaService {
     return respuestaRepository.obtenerConteoPorRespuesta(idPregunta);
     }
 
+    @Autowired
+    public RespuestaService(RespuestaRepository respuestaRepository) {
+        this.respuestaRepository = respuestaRepository;
+    }
 
-
+    @Transactional
+    public void guardar(Respuesta respuesta) {
+        respuestaRepository.save(respuesta);
+    }
 }
