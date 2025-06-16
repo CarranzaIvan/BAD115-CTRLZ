@@ -1,17 +1,6 @@
-// RespuestaEncuesta.java
 package com.bad.ctrlz.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,20 +21,20 @@ public class RespuestaEncuesta {
     @JoinColumn(name = "id_encuesta", nullable = false)
     private Encuesta encuesta;
 
-    @ManyToOne
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_encuestado", nullable = false)
+    private Encuestado encuestado;
 
     @OneToMany(mappedBy = "respuestaEncuesta", fetch = FetchType.LAZY)
     private Set<Respuesta> respuestas = new HashSet<>();
 
     public RespuestaEncuesta() { }
 
-    public RespuestaEncuesta(Integer idRespuestaEncuesta, LocalDateTime fechaEnvio, Encuesta encuesta, Usuario usuario) {
+    public RespuestaEncuesta(Integer idRespuestaEncuesta, LocalDateTime fechaEnvio, Encuesta encuesta, Encuestado encuestado) {
         this.idRespuestaEncuesta = idRespuestaEncuesta;
-        this.fechaEnvio           = fechaEnvio;
-        this.encuesta             = encuesta;
-        this.usuario              = usuario;
+        this.fechaEnvio = fechaEnvio;
+        this.encuesta = encuesta;
+        this.encuestado = encuestado;
     }
 
     public Integer getIdRespuestaEncuesta() {
@@ -72,12 +61,12 @@ public class RespuestaEncuesta {
         this.encuesta = encuesta;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public Encuestado getEncuestado() {
+        return encuestado;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setEncuestado(Encuestado encuestado) {
+        this.encuestado = encuestado;
     }
 
     public Set<Respuesta> getRespuestas() {
