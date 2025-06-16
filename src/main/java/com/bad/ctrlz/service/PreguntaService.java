@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PreguntaService {
@@ -40,6 +41,16 @@ public class PreguntaService {
     public List<Pregunta> obtenerPreguntasPorEncuesta(Integer idEncuesta) {
         return preguntaRepository.findByEncuestaIdEncuesta(idEncuesta);
     }
+
+    //Listar las preguntas con opciones
+    public Optional<Pregunta> buscarConOpcionesPorId(Integer id) {
+    return preguntaRepository.buscarPreguntaConOpciones(id);
+    }
+
+    public Optional<Pregunta> buscarConTipoYOpcionesPorId(Integer id) {
+    return preguntaRepository.buscarConTipoYOpcionesPorId(id);
+    }
+
 
 }
 
