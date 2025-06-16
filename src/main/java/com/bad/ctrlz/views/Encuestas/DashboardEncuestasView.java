@@ -122,7 +122,7 @@ public class DashboardEncuestasView extends VerticalLayout {
     }
 
     private void generarLinkEncuesta(Encuesta encuesta) {
-        String baseUrl = "http://localhost:8081/public/encuesta/";
+        String baseUrl = "http://3.149.249:8090/public/encuesta/";
 
         // Si ya tiene un link generado, lo usamos
         if (encuesta.getLinkPublico() != null && !encuesta.getLinkPublico().isEmpty()) {
