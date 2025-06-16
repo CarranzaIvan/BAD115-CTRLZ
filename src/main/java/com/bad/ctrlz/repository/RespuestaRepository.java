@@ -1,5 +1,5 @@
 package com.bad.ctrlz.repository;
-import java.util.List;
+
 import com.bad.ctrlz.model.Respuesta;
 import com.bad.ctrlz.model.Pregunta;
 import com.bad.ctrlz.dto.RespuestaIndividualDTO;
@@ -17,9 +17,8 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Integer> {
     List<Respuesta> findByPregunta(Pregunta pregunta);
     List<Respuesta> findByRespuestaEncuesta(RespuestaEncuesta respuestaEncuesta);
 
-    // Agregamos el JOIN FETCH para evitar LazyInitializationException
     @Query("""
-        SELECT DISTINCT r 
+        SELECT DISTINCT r
         FROM Respuesta r
         LEFT JOIN FETCH r.pregunta p
         LEFT JOIN FETCH p.tipoPregunta tp
@@ -64,5 +63,4 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Integer> {
         )
     """)
     List<GraficoPreguntaDTO> obtenerConteoPorRespuesta(Integer idPregunta);
-
 }

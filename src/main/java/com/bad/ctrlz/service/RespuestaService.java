@@ -43,4 +43,8 @@ public class RespuestaService {
     public void guardar(Respuesta respuesta) {
         respuestaRepository.save(respuesta);
     }
+
+    public List<RespuestaIndividualDTO> obtenerRespuestasPorPregunta(Integer idPregunta) {
+        return respuestaRepository.obtenerRespuestasPorPregunta(idPregunta);
+    }
 }

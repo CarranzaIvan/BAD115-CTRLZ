@@ -50,6 +50,9 @@ public class Pregunta {
     @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
     private Set<Opcion> opciones = new HashSet<>();
 
+    @OneToMany(mappedBy = "pregunta", fetch = FetchType.LAZY)
+    private Set<Respuesta> respuestas = new HashSet<>();
+
     public Pregunta() { }
 
     public Pregunta(Integer idPregunta, Encuesta encuesta, TipoPregunta tipoPregunta,
