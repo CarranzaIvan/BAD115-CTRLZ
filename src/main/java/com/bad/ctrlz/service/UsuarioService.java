@@ -198,4 +198,18 @@ public class UsuarioService {
         return usuarioRepository.findSolicitud();
     }
 
+    //Redireccionamiento a inicio
+    public boolean validarCredenciales(String correo, String password) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(correo);
+
+        if (usuarioOpt.isPresent()) {
+            Usuario usuario = usuarioOpt.get();
+            // Validamos la contraseña
+            return usuario.getPassword().equals(password);
+        }
+
+        return false;
+    }
+
+
 }
