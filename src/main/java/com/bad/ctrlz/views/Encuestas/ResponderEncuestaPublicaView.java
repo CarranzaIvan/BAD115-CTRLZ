@@ -386,6 +386,46 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
             Notification.show("Debe completar todos los datos personales.", 4000, Notification.Position.MIDDLE);
             validacionFallida = true;
         }
+        // Limpiar bordes anteriores
+        nombreField.getElement().getStyle().remove("border");
+        apellidoField.getElement().getStyle().remove("border");
+        correoField.getElement().getStyle().remove("border");
+        generoCombo.getElement().getStyle().remove("border");
+        fechaNacimientoPicker.getElement().getStyle().remove("border");
+
+        // Inicializar bandera de error de datos personales
+        boolean errorDatosPersonales = false;
+
+        // Validación personalizada
+        if (nombreField.getValue() == null || nombreField.getValue().isBlank()) {
+            nombreField.getElement().getStyle().set("border", "2px solid red");
+            errorDatosPersonales = true;
+        }
+
+        if (apellidoField.getValue() == null || apellidoField.getValue().isBlank()) {
+            apellidoField.getElement().getStyle().set("border", "2px solid red");
+            errorDatosPersonales = true;
+        }
+
+        if (correoField.getValue() == null || correoField.getValue().isBlank()) {
+            correoField.getElement().getStyle().set("border", "2px solid red");
+            errorDatosPersonales = true;
+        }
+
+        if (generoCombo.getValue() == null) {
+            generoCombo.getElement().getStyle().set("border", "2px solid red");
+            errorDatosPersonales = true;
+        }
+
+        if (fechaNacimientoPicker.getValue() == null) {
+            fechaNacimientoPicker.getElement().getStyle().set("border", "2px solid red");
+            errorDatosPersonales = true;
+        }
+
+        if (errorDatosPersonales) {
+            Notification.show("Debe completar todos los datos personales.", 4000, Notification.Position.MIDDLE);
+            validacionFallida = true;
+        }
 
         if (validacionFallida) {
             Notification.show("Por favor complete todos los campos requeridos.", 4000, Notification.Position.MIDDLE);
