@@ -47,8 +47,8 @@ public class UsuarioService {
         usuario.setRoles(rolUsuario);
 
         // Aquí puedes agregar lógica adicional antes de guardar el usuario
-        System.out.println(usuario.toString());
-
+        // String cotrasena = usuario.getPassword();
+        //usuario.setPassword(passwordEncoder.encode(contrasena));
         usuarioRepository.save(usuario);
 
         return true; // Usuario guardado exitosamente
@@ -94,6 +94,9 @@ public class UsuarioService {
         boolean enviado = false;
         enviado = emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombre,
                 consideracion);
+
+        //usuario.getPassword(passwordEncoder.encode(nuevaContrasena));
+        usuarioRepository.save(usuario);
         return enviado;
     }
 
@@ -173,9 +176,32 @@ public class UsuarioService {
         String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
 
         // Aquí puedes guardar la nueva contraseña en la base si aplica
-        // usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
-        // usuarioRepository.save(usuario);
+        //usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+        usuarioRepository.save(usuario);
 
+        // Enviar correo
+        return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
+    }
+
+    public Boolean enviarRechazoBloqueo(String correo) {
+        // Plantilla del mensaje
+        final String subject = "Rechazo de desbloqueo";
+        final String descripcion = """
+                Hemos recibido su solicitud de desbloqueo de credenciales, pero ha sido RECHAZADA para acceder al sistema de encuestas CTRLZ.
+                """;
+        final String consideracion = """
+                Si ha solicitado este cambio, le recomendamos comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.
+                """;
+
+        // Validar existencia del usuario
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        if (usuario == null) {
+            return false; // Usuario no encontrado
+        }
+
+        // Generar nueva contraseña y actualizarla si es necesario
+        String nuevaContrasena = "-- RECHAZADO --";
+        String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
         // Enviar correo
         return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
     }
@@ -198,6 +224,22 @@ public class UsuarioService {
         return usuarioRepository.findSolicitud();
     }
 
+    /*
+     * Rechazar peticion de desbloqueo
+     */
+    public void rechazarSolicitud(Usuario usuario) {
+        usuario.setAccountNoExpired(true);
+        usuarioRepository.save(usuario);
+    }
+
+    /*
+     * Aceptar peticion de desbloqueo
+     */
+    public void aceptarSolicitud(Usuario usuario) {
+        usuario.setAccountLocked(false);
+        usuario.setAccountNoExpired(true);
+        usuarioRepository.save(usuario);
+    }
     //Redireccionamiento a inicio
     public boolean validarCredenciales(String correo, String password) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(correo);
@@ -210,6 +252,5 @@ public class UsuarioService {
 
         return false;
     }
-
 
 }

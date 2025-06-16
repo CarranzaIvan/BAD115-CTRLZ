@@ -255,23 +255,28 @@ public class UserUnblockView extends VerticalLayout {
 
         private VerticalLayout createBlockedUsersSection() {
                 VerticalLayout section = new VerticalLayout();
-  
-                section.setFlexGrow(1); // AÑADIR: para que tome el espacio disponible
-                section.getStyle().set("margin-bottom", "30px");
+                section.setSizeFull(); // Expande todo el espacio disponible
+                section.setPadding(false);
+                section.setSpacing(false);
 
-                // Contenedor mejorado
+                // Contenedor estilizado
                 Div container = new Div();
+                container.setSizeFull(); // Ocupa todo el espacio del section
                 container.getStyle()
                                 .set("background", "#ffffff")
                                 .set("border-radius", "12px")
                                 .set("padding", "24px")
                                 .set("box-shadow", "0 4px 6px rgba(0,0,0,0.07)")
                                 .set("border", "1px solid #e2e8f0")
-                                .set("height", "100%") // AÑADIR: para que use toda la altura
-                                .set("display", "flex") // AÑADIR: para control de layout
-                                .set("flex-direction", "column"); // AÑADIR: dirección vertical
+                                .set("width", "80%") // Ejemplo: 80% del ancho del contenedor padre
+                                .set("margin", "0 auto")// Centrado horizontal
+                                .set("height", "auto") // CAMBIADO de 100% a auto
+                                .set("min-height", "300px")// Si quieres al menos una base
+                                .set("display", "flex")
+                                .set("flex-direction", "column")
+                                .set("flex-grow", "1");
 
-                // Título mejorado
+                // Título y subtítulo
                 H2 sectionTitle = new H2("Usuarios Bloqueados");
                 sectionTitle.getStyle()
                                 .set("color", "#1e293b")
@@ -286,18 +291,15 @@ public class UserUnblockView extends VerticalLayout {
                                 .set("margin-bottom", "20px")
                                 .set("display", "block");
 
-                // Verificar si hay datos
                 if (usuariosBloqueados == null || usuariosBloqueados.isEmpty()) {
                         container.add(sectionTitle, sectionSubtitle, createNoDataDiv("No hay usuarios bloqueados"));
                 } else {
-                        // Grid mejorado
                         blockedGrid = new Grid<>(Usuario.class, false);
                         blockedGrid.setItems(usuariosBloqueados);
-                        blockedGrid.setHeight("400px");
-                        blockedGrid.setSizeFull(); // CAMBIAR: era setHeight("400px")
-                        blockedGrid.setMinHeight("300px"); // AÑADIR: altura mínima
+                        blockedGrid.setSizeFull(); // Se adapta a su contenedor
+                        blockedGrid.setMinHeight("300px");
 
-                        // Columnas optimizadas
+                        // Columnas configuradas
                         blockedGrid.addColumn(usuario -> usuario.getNombre() + " " + usuario.getApellido())
                                         .setHeader("Nombre Usuario")
                                         .setAutoWidth(true)
@@ -308,7 +310,6 @@ public class UserUnblockView extends VerticalLayout {
                                         .setAutoWidth(true)
                                         .setFlexGrow(1);
 
-                        // Columna de acciones con botón mejorado
                         blockedGrid.addComponentColumn(usuario -> {
                                 Button unblockBtn = new Button("Desbloquear", VaadinIcon.UNLOCK.create());
                                 unblockBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
@@ -316,7 +317,6 @@ public class UserUnblockView extends VerticalLayout {
                                 return unblockBtn;
                         }).setHeader("Acciones").setAutoWidth(true).setFlexGrow(0);
 
-                        // Estilos del grid
                         blockedGrid.getStyle()
                                         .set("border-radius", "8px")
                                         .set("border", "1px solid #e2e8f0");
@@ -330,25 +330,29 @@ public class UserUnblockView extends VerticalLayout {
 
         private VerticalLayout createUnblockRequestsSection() {
                 VerticalLayout section = new VerticalLayout();
-                section.setWidthFull();
-                section.setSizeFull(); // CAMBIAR: para que use toda la altura
+                section.setSizeFull(); // Usa todo el espacio disponible
                 section.setPadding(false);
                 section.setSpacing(true);
-                section.setFlexGrow(1); // AÑADIR: para que tome el espacio disponible
+                section.setFlexGrow(1);
 
-                // Contenedor mejorado
+                // Contenedor estilizado
                 Div container = new Div();
+                container.setSizeFull(); // Se adapta a su contenedor padre
                 container.getStyle()
                                 .set("background", "#ffffff")
                                 .set("border-radius", "12px")
                                 .set("padding", "24px")
                                 .set("box-shadow", "0 4px 6px rgba(0,0,0,0.07)")
                                 .set("border", "1px solid #e2e8f0")
-                                .set("height", "100%") // AÑADIR: para que use toda la altura
-                                .set("display", "flex") // AÑADIR: para control de layout
-                                .set("flex-direction", "column"); // AÑADIR: dirección vertical
+                                .set("width", "80%")
+                                .set("margin", "0 auto") //
+                                .set("height", "auto") // CAMBIADO de 100% a auto
+                                .set("min-height", "100px")// Si quieres al menos una base
+                                .set("display", "flex")
+                                .set("flex-direction", "column")
+                                .set("flex-grow", "1");
 
-                // Título mejorado
+                // Título
                 H2 sectionTitle = new H2("Solicitudes de Desbloqueo");
                 sectionTitle.getStyle()
                                 .set("color", "#1e293b")
@@ -363,7 +367,6 @@ public class UserUnblockView extends VerticalLayout {
                                 .set("margin-bottom", "20px")
                                 .set("display", "block");
 
-                // Verificar si hay datos
                 if (solicitudesDesbloqueo == null || solicitudesDesbloqueo.isEmpty()) {
                         container.add(sectionTitle, sectionSubtitle,
                                         createNoDataDiv("No hay solicitudes de desbloqueo pendientes"));
@@ -371,10 +374,9 @@ public class UserUnblockView extends VerticalLayout {
                         // Grid mejorado
                         requestsGrid = new Grid<>(Usuario.class, false);
                         requestsGrid.setItems(solicitudesDesbloqueo);
-                        requestsGrid.setSizeFull(); // CAMBIAR: era setHeight("400px")
-                        requestsGrid.setMinHeight("300px"); // AÑADIR: altura mínima
+                        requestsGrid.setSizeFull();
+                        requestsGrid.setMinHeight("300px");
 
-                        // Columnas optimizadas
                         requestsGrid.addColumn(usuario -> usuario.getNombre() + " " + usuario.getApellido())
                                         .setHeader("Nombre")
                                         .setAutoWidth(true)
@@ -385,12 +387,10 @@ public class UserUnblockView extends VerticalLayout {
                                         .setAutoWidth(true)
                                         .setFlexGrow(1);
 
-                        // Columna de acciones con botones correctamente coloreados
                         requestsGrid.addComponentColumn(request -> {
                                 HorizontalLayout actions = new HorizontalLayout();
                                 actions.setSpacing(true);
 
-                                // Botón Aprobar - Verde
                                 Button approveBtn = new Button("Aprobar", VaadinIcon.CHECK.create());
                                 approveBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                                 approveBtn.getStyle()
@@ -401,7 +401,6 @@ public class UserUnblockView extends VerticalLayout {
                                                 .set("font-weight", "500");
                                 approveBtn.addClickListener(e -> handleApprove(request));
 
-                                // Botón Rechazar - Rojo
                                 Button rejectBtn = new Button("Rechazar", VaadinIcon.CLOSE.create());
                                 rejectBtn.addThemeVariants(ButtonVariant.LUMO_SMALL);
                                 rejectBtn.getStyle()
@@ -416,7 +415,6 @@ public class UserUnblockView extends VerticalLayout {
                                 return actions;
                         }).setHeader("Acciones").setAutoWidth(true).setFlexGrow(0);
 
-                        // Estilos del grid
                         requestsGrid.getStyle()
                                         .set("border-radius", "8px")
                                         .set("border", "1px solid #e2e8f0");
@@ -454,6 +452,7 @@ public class UserUnblockView extends VerticalLayout {
 
         private void handleUnblock(Usuario usuario) {
                 if (usuarioService.enviarDesbloqueo(usuario.getCorreo())) {
+                        usuarioService.aceptarSolicitud(usuario);
                         Notification notification = Notification.show(
                                         "Usuario desbloqueado: " + usuario.getNombre(),
                                         3000,
@@ -471,6 +470,7 @@ public class UserUnblockView extends VerticalLayout {
 
         private void handleApprove(Usuario request) {
                 if (usuarioService.enviarDesbloqueo(request.getCorreo())) {
+                        usuarioService.aceptarSolicitud(request);
                         Notification notification = Notification.show(
                                         "Solicitud aprobada: " + request.getNombre(),
                                         3000,
@@ -487,13 +487,22 @@ public class UserUnblockView extends VerticalLayout {
         }
 
         private void handleReject(Usuario request) {
-                // Aquí deberías implementar la lógica de rechazo en el servicio
-                Notification notification = Notification.show(
-                                "Solicitud rechazada: " + request.getNombre(),
-                                3000,
-                                Notification.Position.TOP_END);
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                actualizarDatos();
+                if (usuarioService.enviarRechazoBloqueo(request.getCorreo())) {
+                        usuarioService.rechazarSolicitud(request);
+                        Notification notification = Notification.show(
+                                        "Solicitud rechazada: " + request.getNombre(),
+                                        3000,
+                                        Notification.Position.TOP_END);
+                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                        actualizarDatos();
+                } else {
+                        Notification notification = Notification.show(
+                                        "Error al rechazar solicitud",
+                                        3000,
+                                        Notification.Position.TOP_END);
+                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+
         }
 
         private String hexToLight(String hex) {
