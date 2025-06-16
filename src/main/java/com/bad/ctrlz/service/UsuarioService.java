@@ -122,6 +122,14 @@ public class UsuarioService {
     }
 
     /*
+     * Contar número de peticiones de desbloqueo
+     */
+    public Integer obtenerSolicitud() {
+        Integer solicitudes = usuarioRepository.contarSolicitudDesbloqueo();
+        return solicitudes;
+    }
+
+    /*
      * Obtener listado de usuarios
      */
     public List<Usuario> obtenerUsuarios() {
@@ -129,8 +137,65 @@ public class UsuarioService {
         return usuarios;
     }
 
+    /*
+     * Actualizar usuario
+     */
     public void actualizarUsuario(Usuario usuario) {
         usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Envía un correo para notificar el desbloqueo de un usuario y genera nueva
+     * contraseña.
+     * 
+     * @param correo Correo electrónico del usuario a desbloquear
+     * @return true si el correo fue enviado exitosamente, false si no
+     */
+    public Boolean enviarDesbloqueo(String correo) {
+        // Plantilla del mensaje
+        final String subject = "Desbloqueo de credenciales";
+        final String descripcion = """
+                Hemos recibido su solicitud de desbloqueo de credenciales para acceder al sistema de encuestas CTRLZ.
+                A continuación, encontrará la información necesaria para acceder con su usuario desbloqueado:
+                """;
+        final String consideracion = """
+                Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.
+                """;
+
+        // Validar existencia del usuario
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        if (usuario == null) {
+            return false; // Usuario no encontrado
+        }
+
+        // Generar nueva contraseña y actualizarla si es necesario
+        String nuevaContrasena = passwordGenerator.generateRandomPassword(8);
+        String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
+
+        // Aquí puedes guardar la nueva contraseña en la base si aplica
+        // usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+        // usuarioRepository.save(usuario);
+
+        // Enviar correo
+        return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
+    }
+
+    /**
+     * Retorna una lista de usuarios bloqueados.
+     * 
+     * @return lista de usuarios en estado bloqueado
+     */
+    public List<Usuario> obtenerListadoBloqueados() {
+        return usuarioRepository.findBloqueados();
+    }
+
+    /**
+     * Retorna una lista de usuarios que han solicitado desbloqueo.
+     * 
+     * @return lista de usuarios con solicitud de desbloqueo
+     */
+    public List<Usuario> obtenerListadoSolicitud() {
+        return usuarioRepository.findSolicitud();
     }
 
 }
