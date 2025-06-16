@@ -20,6 +20,6 @@ public interface EncuestaRepository extends JpaRepository<Encuesta, Long> {
         GROUP BY e
     """)
     List<Object[]> obtenerDashboardRespuestas();
-
     Optional<Encuesta> findByLinkPublico(String linkPublico);
 }
+

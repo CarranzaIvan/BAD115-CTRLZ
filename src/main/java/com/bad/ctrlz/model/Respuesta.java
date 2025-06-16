@@ -33,7 +33,8 @@ public class Respuesta {
     @JoinColumn(name = "id_opcion")
     private Opcion opcion;
 
-    @Column(name = "texto_abierto", length = 255)
+    @Lob
+    @Column(name = "texto_abierto")
     private String textoAbierto;
 
     @Column(name = "valor_escala")

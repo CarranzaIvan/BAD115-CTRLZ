@@ -78,6 +78,12 @@ el downgrade seguro -->
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Dependencias de envio de correos -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<dependencyManagement>

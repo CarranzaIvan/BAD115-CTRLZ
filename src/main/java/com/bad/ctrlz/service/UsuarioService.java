@@ -1,11 +1,14 @@
 package com.bad.ctrlz.service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bad.ctrlz.configuraciones.Seguridad.PasswordGenerator;
+import com.bad.ctrlz.configuraciones.Seguridad.CorreoElectronico.SendMail;
 import com.bad.ctrlz.model.Rol;
 import com.bad.ctrlz.model.Usuario;
 import com.bad.ctrlz.repository.RolRepository;
@@ -19,6 +22,12 @@ public class UsuarioService {
 
     @Autowired
     private RolRepository rolRepository;
+
+    @Autowired
+    private PasswordGenerator passwordGenerator;
+
+    @Autowired
+    private SendMail emailService;
 
     /**
      * Guarda un usuario en la base de datos.
@@ -55,13 +64,138 @@ public class UsuarioService {
         return usuarioRepository.existsByEmail(correo);
     }
 
+    /**
+     * Busca un usuario y verifica si esta bloqueado.
+     * 
+     * @param correo El correo electrónico del usuario a buscar.
+     * @return Un Bolean que indica si el usuario existe o no.
+     */
+    public boolean validarBloqueo(String correo) {
+        return usuarioRepository.existsUnlockedUserByCorreo(correo);
+    }
+
     /*
      * Envio de correo electrónico para la recuperación de contraseña
      */
-    public void enviarCorreoRecuperacion(String correo) {
-        // Aquí puedes implementar la lógica para enviar un correo electrónico
-        // al usuario con instrucciones para recuperar su contraseña.
-        // Por ejemplo, generar un token de recuperación y enviarlo por correo.
-        System.out.println("Enviando correo de recuperación a: " + correo);
+    public Boolean enviarCorreoRecuperacion(String correo) {
+        // Informacion estatica
+        String subject = "Recuperación de credenciales";
+        String descripcion = "Hemos recibido su solicitud de recuperación de credenciales para acceder al sistema de encuestas CTRLZ.\r\n"
+                + //
+                "A continuación, encontrará la información necesaria para restablecer su acceso:\r\n" + //
+                "";
+        String consideracion = "Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.\r\n";
+
+        // Datos de usuario
+        String nuevaContrasena = passwordGenerator.generateRandomPassword(8);
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        String nombre = usuario.getNombre() + " " + usuario.getApellido();
+
+        boolean enviado = false;
+        enviado = emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombre,
+                consideracion);
+        return enviado;
     }
+
+    /*
+     * Contar número de usuarios activos
+     */
+    public Integer obtenerActivos() {
+        Integer activos = usuarioRepository.contarUsuariosActivos();
+        return activos;
+    }
+
+    /*
+     * Contar número de usuarios bloqueados
+     */
+    public Integer obtenerBloqueados() {
+        Integer bloqueados = usuarioRepository.contarUsuariosBloqueados();
+        return bloqueados;
+    }
+
+    /*
+     * Contar número de usuarios inactivos
+     */
+    public Integer obtenerInactivos() {
+        Integer inactivos = usuarioRepository.contarUsuariosDesactivados();
+        return inactivos;
+    }
+
+    /*
+     * Contar número de peticiones de desbloqueo
+     */
+    public Integer obtenerSolicitud() {
+        Integer solicitudes = usuarioRepository.contarSolicitudDesbloqueo();
+        return solicitudes;
+    }
+
+    /*
+     * Obtener listado de usuarios
+     */
+    public List<Usuario> obtenerUsuarios() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios;
+    }
+
+    /*
+     * Actualizar usuario
+     */
+    public void actualizarUsuario(Usuario usuario) {
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Envía un correo para notificar el desbloqueo de un usuario y genera nueva
+     * contraseña.
+     * 
+     * @param correo Correo electrónico del usuario a desbloquear
+     * @return true si el correo fue enviado exitosamente, false si no
+     */
+    public Boolean enviarDesbloqueo(String correo) {
+        // Plantilla del mensaje
+        final String subject = "Desbloqueo de credenciales";
+        final String descripcion = """
+                Hemos recibido su solicitud de desbloqueo de credenciales para acceder al sistema de encuestas CTRLZ.
+                A continuación, encontrará la información necesaria para acceder con su usuario desbloqueado:
+                """;
+        final String consideracion = """
+                Si no ha solicitado este cambio, le recomendamos ignorar este mensaje o comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.
+                """;
+
+        // Validar existencia del usuario
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        if (usuario == null) {
+            return false; // Usuario no encontrado
+        }
+
+        // Generar nueva contraseña y actualizarla si es necesario
+        String nuevaContrasena = passwordGenerator.generateRandomPassword(8);
+        String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
+
+        // Aquí puedes guardar la nueva contraseña en la base si aplica
+        // usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+        // usuarioRepository.save(usuario);
+
+        // Enviar correo
+        return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
+    }
+
+    /**
+     * Retorna una lista de usuarios bloqueados.
+     * 
+     * @return lista de usuarios en estado bloqueado
+     */
+    public List<Usuario> obtenerListadoBloqueados() {
+        return usuarioRepository.findBloqueados();
+    }
+
+    /**
+     * Retorna una lista de usuarios que han solicitado desbloqueo.
+     * 
+     * @return lista de usuarios con solicitud de desbloqueo
+     */
+    public List<Usuario> obtenerListadoSolicitud() {
+        return usuarioRepository.findSolicitud();
+    }
+
 }

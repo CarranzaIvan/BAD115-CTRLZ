@@ -1,6 +1,5 @@
 package com.bad.ctrlz.model;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -44,7 +43,7 @@ public class Encuesta {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "encuesta", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "encuesta", fetch = FetchType.LAZY)
     private Set<Pregunta> preguntas = new HashSet<>();
 
     public Encuesta() { }

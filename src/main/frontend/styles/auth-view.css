@@ -1,364 +1,79 @@
 /* === FONDO PRINCIPAL PARA LA VISTA DE AUTENTICACIÓN === */
 .auth-view.gradient-background {
     background: linear-gradient(135deg, #2c3e50 0%, #4a4a4a 50%, #666666 100%);
-    min-height: 100vh;
-    padding: 20px;
-    /* SOLUCIÓN PRINCIPAL: Usar flex en lugar de grid para permitir scroll */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    /* Permitir que el contenedor crezca más allá de 100vh si es necesario */
-    height: auto;
-    min-height: 100vh;
-    box-sizing: border-box;
-    /* Agregar padding superior para centrar visualmente cuando hay espacio */
-    padding-top: max(20px, calc(50vh - 400px));
-    padding-bottom: 40px;
+    min-height: 100vh; /* Altura mínima de toda la pantalla */
+    min-width: 100vw;  /* Ancho mínimo de toda la pantalla */
+    position: relative;
+    overflow-x: hidden; /* Evitar scroll horizontal */
 }
 
 /* === ESTILOS PARA LA TARJETA DE AUTENTICACIÓN === */
 .auth-card {
     background: white;
-    border-radius: 12px;
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.3),
-        0 5px 15px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    position: relative;
-    /* SOLUCIÓN: Permitir crecimiento automático */
-    overflow: visible;
-    width: 100%;
-    max-width: 450px;
-    /* Padding más controlado */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 30px;
-    box-sizing: border-box;
-    /* Altura completamente automática */
-    height: auto;
-    min-height: auto;
-    /* Asegurar que sea visible y no se corte */
-    margin: 0 auto;
-    flex-shrink: 0; /* Evitar que se comprima */
+    width: 400px;
+    max-width: 90vw;
+    margin: 20px auto;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
-/* Efecto hover para la tarjeta */
-.auth-card:hover {
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 8px 20px rgba(0, 0, 0, 0.3);
-    transform: translateY(-2px);
-}
-
-/* === ESTILOS PARA EL TÍTULO === */
-.auth-title {
-    color: #2c3e50 !important;
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 8px !important;
-    text-align: center;
-}
-
-/* === ESTILOS PARA LA DESCRIPCIÓN === */
-.auth-description {
-    color: #7f8c8d !important;
-    font-size: 14px;
-    margin-bottom: 20px !important;
-    text-align: center;
-    line-height: 1.4;
-}
-
-/* === ESTILOS PARA LAS PESTAÑAS === */
-vaadin-tabs.tabs-centered {
-    margin-bottom: 20px;
-}
-
-vaadin-tab {
-    color: #7f8c8d;
-    font-weight: 500;
-    transition: color 0.3s ease;
-}
-
-vaadin-tab[selected] {
-    color: #2c3e50;
-    font-weight: 600;
-}
-
-/* === ESTILOS PARA LOS FORMULARIOS === */
+/* === ESTILOS PARA FORMULARIOS === */
 .auth-form {
     width: 100%;
-    /* Reducir margen inferior */
-    margin-bottom: 0px;
 }
 
-/* === ESTILOS PARA LOS CAMPOS DE ENTRADA === */
-vaadin-email-field,
-vaadin-text-field,
-vaadin-password-field {
-    margin-bottom: 15px !important; /* Reducir espacio entre campos */
-    width: 100%;
-}
-
-/* Personalizar los campos de entrada */
-vaadin-email-field::part(input-field),
-vaadin-text-field::part(input-field),
-vaadin-password-field::part(input-field) {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    min-height: 45px; /* Reducir altura de campos */
-}
-
-vaadin-email-field::part(input-field):hover,
-vaadin-text-field::part(input-field):hover,
-vaadin-password-field::part(input-field):hover {
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
-}
-
-vaadin-email-field::part(input-field):focus-within,
-vaadin-text-field::part(input-field):focus-within,
-vaadin-password-field::part(input-field):focus-within {
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-    background-color: white;
-}
-
-/* === ESTILOS PARA LOS BOTONES === */
-vaadin-button[theme~="primary"] {
-    background-color: #3498db;
-    border-color: #3498db;
-    height: 45px; /* Reducir altura de botones */
-    font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    width: 100%;
-    margin-top: 8px;
+/* === ESTILOS PARA TÍTULOS === */
+.auth-title {
+    text-align: center;
+    color: #2c3e50;
     margin-bottom: 10px;
-}
-
-vaadin-button[theme~="primary"]:hover {
-    background-color: #2980b9;
-    border-color: #2980b9;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-}
-
-vaadin-button[theme~="success"] {
-    background-color: #27ae60;
-    border-color: #27ae60;
-    height: 45px;
+    font-size: 1.5rem;
     font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    width: 100%;
-    margin-top: 8px;
-    margin-bottom: 10px;
 }
 
-vaadin-button[theme~="success"]:hover {
-    background-color: #229954;
-    border-color: #229954;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+.auth-description {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
 }
 
-vaadin-button[theme~="tertiary"] {
-    color: #3498db;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    margin-top: 8px;
-}
-
-vaadin-button[theme~="tertiary"]:hover {
-    color: #2980b9;
-    text-decoration: underline;
-}
-
-/* === ESTILOS PARA NOTIFICACIONES === */
-vaadin-notification-card[theme~="success"] {
-    background-color: #27ae60;
-    border-radius: 8px;
-}
-
-vaadin-notification-card[theme~="error"] {
-    background-color: #e74c3c;
-    border-radius: 8px;
-}
-
-/* === ESTILOS RESPONSIVOS === */
-@media (max-width: 768px) {
-    .auth-view.gradient-background {
-        padding: 15px;
-        /* Reducir padding superior en móviles */
-        padding-top: 20px;
-        padding-bottom: 30px;
-        /* Mantener flex para permitir scroll */
-        justify-content: flex-start;
-    }
-    
-    .auth-card {
-        width: 100% !important;
-        max-width: 100%;
-        margin: 0;
-        padding: 25px;
-        /* Reducir radio de borde en móviles */
-        border-radius: 8px;
-    }
-    
-    .auth-title {
-        font-size: 24px;
-    }
-    
-    .auth-description {
-        font-size: 13px;
-        margin-bottom: 15px !important;
-    }
-    
-    /* Reducir espacios entre campos en móviles */
-    vaadin-email-field,
-    vaadin-text-field,
-    vaadin-password-field {
-        margin-bottom: 12px !important;
-    }
-}
-
+/* === RESPONSIVIDAD === */
 @media (max-width: 480px) {
-    .auth-view.gradient-background {
-        padding: 10px;
-        padding-top: 15px;
-        padding-bottom: 25px;
-    }
-    
     .auth-card {
-        width: 100% !important;
-        border-radius: 8px;
+        width: 95vw;
         padding: 20px;
-        margin: 0;
-    }
-    
-    vaadin-button[theme~="primary"],
-    vaadin-button[theme~="success"] {
-        height: 42px;
-        font-size: 14px;
-    }
-    
-    vaadin-email-field,
-    vaadin-text-field,
-    vaadin-password-field {
-        margin-bottom: 10px !important;
-    }
-    
-    /* Campos más compactos en móviles */
-    vaadin-email-field::part(input-field),
-    vaadin-text-field::part(input-field),
-    vaadin-password-field::part(input-field) {
-        min-height: 42px;
-    }
-}
-
-/* === ANIMACIONES OPCIONALES === */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.auth-card {
-    animation: fadeInUp 0.6s ease-out;
-}
-
-/* === EFECTOS ADICIONALES === */
-.auth-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #3498db, #27ae60, #e74c3c, #f39c12);
-    border-radius: 12px 12px 0 0;
-    z-index: 1;
-}
-
-/* === ESTILOS PARA CAMPOS CON ERROR === */
-vaadin-email-field[invalid]::part(input-field),
-vaadin-text-field[invalid]::part(input-field),
-vaadin-password-field[invalid]::part(input-field) {
-    border-color: #e74c3c;
-    background-color: #fdf2f2;
-}
-
-vaadin-email-field[invalid]::part(error-message),
-vaadin-text-field[invalid]::part(error-message),
-vaadin-password-field[invalid]::part(error-message) {
-    color: #e74c3c;
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-/* === CLASE DE UTILIDAD PARA DEBUGGING - Remover en producción === */
-.debug-borders * {
-    border: 1px solid red !important;
-}
-
-/* === ESTILOS PARA EL CONTENIDO INTERNO === */
-.auth-card-content {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-/* === SOLUCIÓN ESPECÍFICA PARA FORMULARIOS LARGOS === */
-/* Asegurar que los títulos y descripciones tengan espaciado consistente */
-.auth-form .auth-title {
-    margin-top: 0 !important;
-    margin-bottom: 8px !important;
-}
-
-.auth-form .auth-description {
-    margin-top: 0 !important;
-    margin-bottom: 15px !important;
-}
-
-/* Optimizar el espacio vertical en el formulario de registro */
-.auth-form vaadin-form-layout {
-    --vaadin-form-layout-column-spacing: 0;
-}
-
-/* Para pantallas muy pequeñas, hacer la tarjeta casi de pantalla completa */
-@media (max-height: 700px) {
-    .auth-view.gradient-background {
-        padding-top: 10px;
-        justify-content: flex-start;
-    }
-    
-    .auth-card {
-        margin-top: 0;
-    }
-    
-    /* Campos aún más compactos en pantallas bajas */
-    vaadin-email-field,
-    vaadin-text-field,
-    vaadin-password-field {
-        margin-bottom: 8px !important;
+        margin: 10px auto;
+        max-height: 95vh;
     }
     
     .auth-title {
-        font-size: 22px !important;
-        margin-bottom: 5px !important;
+        font-size: 1.3rem;
     }
     
     .auth-description {
-        font-size: 12px !important;
-        margin-bottom: 12px !important;
+        font-size: 0.85rem;
     }
+}
+
+/* === SCROLL PERSONALIZADO === */
+.auth-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.auth-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.auth-card::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.auth-card::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }

@@ -1,16 +1,15 @@
 package com.bad.ctrlz.repository;
-
 import java.util.List;
-
+import com.bad.ctrlz.model.Respuesta;
+import com.bad.ctrlz.model.Pregunta;
+import com.bad.ctrlz.dto.RespuestaIndividualDTO;
+import com.bad.ctrlz.dto.GraficoPreguntaDTO;
+import com.bad.ctrlz.model.RespuestaEncuesta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.bad.ctrlz.dto.GraficoPreguntaDTO;
-import com.bad.ctrlz.dto.RespuestaIndividualDTO;
-import com.bad.ctrlz.model.Pregunta;
-import com.bad.ctrlz.model.Respuesta;
-import com.bad.ctrlz.model.RespuestaEncuesta;
+import java.util.List;
 
 @Repository
 public interface RespuestaRepository extends JpaRepository<Respuesta, Integer> {
@@ -65,4 +64,5 @@ public interface RespuestaRepository extends JpaRepository<Respuesta, Integer> {
         )
     """)
     List<GraficoPreguntaDTO> obtenerConteoPorRespuesta(Integer idPregunta);
+
 }

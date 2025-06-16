@@ -77,7 +77,7 @@ public class Usuario implements Serializable {
         // Constructor por defecto
         this.fechaCreacion = LocalDateTime.now();
         this.fechaActualizacion = LocalDateTime.now();
-        this.primerIngreso = true;
+        this.primerIngreso = false;
         this.enabled = true;
         this.accountNoExpired = true;
         this.accountLocked = false;

@@ -3,12 +3,10 @@ package com.bad.ctrlz.service;
 import com.bad.ctrlz.model.Encuesta;
 import com.bad.ctrlz.dto.DashboardEncuestaDTO;
 import com.bad.ctrlz.dto.PreguntaDetalleDTO;
-
 import java.util.List;
 import java.util.Optional;
 
 public interface EncuestaService {
-
     List<Encuesta> obtenerTodas();
     Optional<Encuesta> buscarPorId(Long id);
     void eliminarPorId(Long id);
