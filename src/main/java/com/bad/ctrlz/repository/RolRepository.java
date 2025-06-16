@@ -3,8 +3,6 @@ package com.bad.ctrlz.repository;
 import com.bad.ctrlz.model.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-
 import java.util.Set;
 
 public interface RolRepository extends JpaRepository <Rol, Integer>{
@@ -17,8 +15,8 @@ public interface RolRepository extends JpaRepository <Rol, Integer>{
     @Query("SELECT r FROM Rol r WHERE r.nombreRol = 'USUARIO'")
     Rol encontrarUsuario();
 
-    @Query("SELECT r FROM Rol r WHERE r.idRol = :idRol")
-    Set<Rol> encontrarRol(@Param("idRol") Integer idRol);
-    
+    // Verificar si existe un rol por nombre
+    @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Rol r WHERE r.nombreRol = :nombreRol")
+    boolean existsByNombreRol(String nombreRol);
 
 }

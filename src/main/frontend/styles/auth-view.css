@@ -1,29 +1,79 @@
-.auth-view {
-  background-color: var(--lumo-contrast-5pct);
+/* === FONDO PRINCIPAL PARA LA VISTA DE AUTENTICACIÓN === */
+.auth-view.gradient-background {
+    background: linear-gradient(135deg, #2c3e50 0%, #4a4a4a 50%, #666666 100%);
+    min-height: 100vh; /* Altura mínima de toda la pantalla */
+    min-width: 100vw;  /* Ancho mínimo de toda la pantalla */
+    position: relative;
+    overflow-x: hidden; /* Evitar scroll horizontal */
 }
 
+/* === ESTILOS PARA LA TARJETA DE AUTENTICACIÓN === */
 .auth-card {
-  background-color: var(--lumo-base-color);
-  border-radius: var(--lumo-border-radius-l);
-  box-shadow: var(--lumo-box-shadow-s);
-  padding: var(--lumo-space-m);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 30px;
+    width: 400px;
+    max-width: 90vw;
+    margin: 20px auto;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
+/* === ESTILOS PARA FORMULARIOS === */
+.auth-form {
+    width: 100%;
+}
+
+/* === ESTILOS PARA TÍTULOS === */
 .auth-title {
-  margin: 0;
-  font-size: var(--lumo-font-size-xl);
-  text-align: center;
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .auth-description {
-  margin-top: var(--lumo-space-xs);
-  margin-bottom: var(--lumo-space-m);
-  text-align: center;
-  color: var(--lumo-secondary-text-color);
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
 }
 
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--lumo-space-m);
+/* === RESPONSIVIDAD === */
+@media (max-width: 480px) {
+    .auth-card {
+        width: 95vw;
+        padding: 20px;
+        margin: 10px auto;
+        max-height: 95vh;
+    }
+    
+    .auth-title {
+        font-size: 1.3rem;
+    }
+    
+    .auth-description {
+        font-size: 0.85rem;
+    }
+}
+
+/* === SCROLL PERSONALIZADO === */
+.auth-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.auth-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.auth-card::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.auth-card::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
 }

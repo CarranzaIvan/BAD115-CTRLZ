@@ -33,7 +33,8 @@ public class Opcion {
     @Column(name = "es_otro")
     private Boolean esOtro = false;
 
-    public Opcion() { }
+    public Opcion() {
+    }
 
     public Opcion(Integer idOpcion, Pregunta pregunta, String textoOpcion, Integer orden) {
         this.idOpcion    = idOpcion;
@@ -74,8 +75,8 @@ public class Opcion {
         this.orden = orden;
     }
 
-     public boolean getesOtro() {
-        return esOtro;
+    public Boolean getEsOtro() {
+        return esOtro != null ? esOtro : false;
     }
 
     public void setesOtro(boolean esOtro) {

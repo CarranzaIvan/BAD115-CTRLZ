@@ -54,3 +54,7 @@ src/main/resources/application.properties
 
 # Ignorar bundles de frontend
 /src/main/bundles/
+
+# Ignorar imports generados de Flow
+/src/main/frontend/generated/flow/
+
