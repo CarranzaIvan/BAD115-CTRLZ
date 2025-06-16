@@ -180,6 +180,29 @@ public class UsuarioService {
         return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
     }
 
+    public Boolean enviarRechazoBloqueo(String correo) {
+        // Plantilla del mensaje
+        final String subject = "Rechazo de desbloqueo";
+        final String descripcion = """
+                Hemos recibido su solicitud de desbloqueo de credenciales, pero ha sido RECHAZADA para acceder al sistema de encuestas CTRLZ.
+                """;
+        final String consideracion = """
+                Si ha solicitado este cambio, le recomendamos comunicarse con nuestro equipo de soporte a través de ctrlzbad@gmail.com para mayor seguridad.
+                """;
+
+        // Validar existencia del usuario
+        Usuario usuario = usuarioRepository.encontrarPorCorreo(correo);
+        if (usuario == null) {
+            return false; // Usuario no encontrado
+        }
+
+        // Generar nueva contraseña y actualizarla si es necesario
+        String nuevaContrasena = "-- RECHAZADO --";
+        String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
+        // Enviar correo
+        return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
+    }
+
     /**
      * Retorna una lista de usuarios bloqueados.
      * 
@@ -198,4 +221,20 @@ public class UsuarioService {
         return usuarioRepository.findSolicitud();
     }
 
+    /*
+     * Rechazar peticion de desbloqueo
+     */
+    public void rechazarSolicitud(Usuario usuario) {
+        usuario.setAccountNoExpired(true);
+        usuarioRepository.save(usuario);
+    }
+
+    /*
+     * Aceptar peticion de desbloqueo
+     */
+    public void aceptarSolicitud(Usuario usuario) {
+        usuario.setAccountLocked(false);
+        usuario.setAccountNoExpired(true);
+        usuarioRepository.save(usuario);
+    }
 }
