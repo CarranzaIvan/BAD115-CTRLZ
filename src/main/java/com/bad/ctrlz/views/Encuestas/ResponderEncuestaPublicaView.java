@@ -2,10 +2,11 @@ package com.bad.ctrlz.views.Encuestas;
 
 import com.bad.ctrlz.model.*;
 import com.bad.ctrlz.service.*;
-
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.checkbox.CheckboxGroup;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.dnd.DragSource;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.*;
@@ -32,25 +33,63 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
     private final OpcionService opcionService;
     private final RespuestaService respuestaService;
     private final RespuestaEncuestaService respuestaEncuestaService;
+    private final EncuestadoService encuestadoService;
 
     private final Map<Pregunta, Component> componentesPorPregunta = new HashMap<>();
     private Encuesta encuestaActual;
 
     @Autowired
-    public ResponderEncuestaPublicaView(EncuestaService encuestaService, PreguntaService preguntaService,
+    public ResponderEncuestaPublicaView(
+            EncuestaService encuestaService, PreguntaService preguntaService,
             OpcionService opcionService, RespuestaService respuestaService,
-            RespuestaEncuestaService respuestaEncuestaService) {
+            RespuestaEncuestaService respuestaEncuestaService,
+            EncuestadoService encuestadoService) {
+
         this.encuestaService = encuestaService;
         this.preguntaService = preguntaService;
         this.opcionService = opcionService;
         this.respuestaService = respuestaService;
         this.respuestaEncuestaService = respuestaEncuestaService;
+        this.encuestadoService = encuestadoService;
 
         setSizeFull();
         setPadding(false);
         setSpacing(false);
         setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         getStyle().set("background-color", "#f3f6fb");
+    }
+
+    private TextField nombreField;
+    private TextField apellidoField;
+    private TextField correoField;
+    private ComboBox<String> generoCombo;
+    private DatePicker fechaNacimientoPicker;
+
+    // Agregamos este método para mostrar la sección del encuestado:
+    private Component crearSeccionEncuestado() {
+        nombreField = new TextField("Nombre");
+        apellidoField = new TextField("Apellido");
+        correoField = new TextField("Correo");
+        generoCombo = new ComboBox<>("Género");
+        fechaNacimientoPicker = new DatePicker("Fecha de Nacimiento");
+
+        VerticalLayout encuestadoLayout = new VerticalLayout();
+        encuestadoLayout.setWidthFull();
+        encuestadoLayout.setSpacing(false);
+        encuestadoLayout.setPadding(false);
+        encuestadoLayout.getStyle().set("margin-bottom", "30px");
+
+        generoCombo.setItems("Masculino", "Femenino", "Otro");
+        generoCombo.setWidthFull();
+        nombreField.setWidthFull();
+        apellidoField.setWidthFull();
+        correoField.setWidthFull();
+        fechaNacimientoPicker.setWidthFull();
+
+        encuestadoLayout.add(
+                new H3("Datos del Encuestado:"),
+                nombreField, apellidoField, correoField, generoCombo, fechaNacimientoPicker);
+        return encuestadoLayout;
     }
 
     @Override
@@ -69,8 +108,7 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
 
     private void mostrarEncuesta(Encuesta encuesta) {
         Div container = new Div();
-        container.getStyle().set("max-width", "900px").set("width", "95%").set("max-height", "85vh")
-                .set("overflow-y", "auto")
+        container.getStyle().set("max-width", "900px").set("width", "95%")
                 .set("margin", "20px auto").set("padding", "30px").set("background-color", "white")
                 .set("border-radius", "15px").set("box-shadow", "0 4px 12px rgba(0,0,0,0.15)");
 
@@ -78,12 +116,14 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
         titulo.getStyle().set("margin-bottom", "10px").set("color", "#1565c0").set("font-weight", "bold");
 
         Paragraph objetivo = new Paragraph("Objetivo: " + encuesta.getObjetivo());
-        objetivo.getStyle().set("margin-bottom", "5px").set("font-size", "16px");
-
         Paragraph grupo = new Paragraph("Grupo Meta: " + encuesta.getGrupoMeta());
-        grupo.getStyle().set("margin-bottom", "20px").set("font-size", "16px");
+        objetivo.getStyle().set("margin-bottom", "5px");
+        grupo.getStyle().set("margin-bottom", "20px");
 
         container.add(titulo, objetivo, grupo);
+
+        // Aquí insertamos el formulario de encuestado
+        container.add(crearSeccionEncuestado());
 
         List<Pregunta> preguntas = preguntaService.obtenerPreguntasPorEncuesta(encuesta.getIdEncuesta());
         for (Pregunta pregunta : preguntas) {
@@ -94,9 +134,32 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
         add(container);
 
         Button enviar = new Button("Enviar Respuestas", e -> guardarRespuestas());
-        enviar.getStyle().set("margin-top", "20px").set("background-color", "#1565c0").set("color", "white")
-                .set("font-weight", "bold");
+        enviar.getStyle().set("margin-top", "20px").set("background-color", "#1565c0").set("color", "white");
         add(enviar);
+    }
+
+    private void mostrarDialogoGracias() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("¡Gracias por participar!");
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        layout.setAlignItems(Alignment.CENTER);
+
+        Label mensaje = new Label("Tus respuestas han sido registradas exitosamente.");
+        mensaje.getStyle().set("font-weight", "bold").set("font-size", "16px");
+
+        Button cerrar = new Button("Cerrar", e -> {
+            dialog.close();
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/")); // Redirige a inicio (puedes cambiar la ruta)
+        });
+
+        cerrar.getStyle().set("background-color", "#1565c0").set("color", "white");
+
+        layout.add(mensaje, cerrar);
+        dialog.add(layout);
+        dialog.open();
     }
 
     private Div crearPreguntaCard(Pregunta pregunta) {
@@ -259,16 +322,16 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
     private void guardarRespuestas() {
         boolean validacionFallida = false;
 
-        // Primero limpiamos todos los estilos de error
+        // Limpiar bordes de error
         componentesPorPregunta.forEach((pregunta, componente) -> {
             componente.getParent().ifPresent(parent -> parent.getElement().getStyle().remove("border"));
         });
 
+        // Validar preguntas
         for (Map.Entry<Pregunta, Component> entry : componentesPorPregunta.entrySet()) {
             Pregunta pregunta = entry.getKey();
             Component componente = entry.getValue();
             boolean esObligatoria = "S".equalsIgnoreCase(pregunta.getObligatorio());
-
             Integer idTipo = pregunta.getTipoPregunta().getIdTipoPregunta();
             boolean invalido = false;
 
@@ -285,12 +348,8 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                     CheckboxGroup<Opcion> multiple = (CheckboxGroup<Opcion>) componente;
                     invalido = esObligatoria && multiple.getSelectedItems().isEmpty();
                 }
-                case 6 -> {
-                    // En ranking no validamos, porque siempre habrá orden
-                }
-                case 10 -> {
-
-                }
+                case 6, 10 -> {
+                    /* No requiere validación */ }
                 case 11 -> {
                     Opcion seleccion = ((ComboBox<Opcion>) componente).getValue();
                     invalido = esObligatoria && (seleccion == null);
@@ -303,10 +362,8 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                     VerticalLayout mixtoLayout = (VerticalLayout) componente;
                     RadioButtonGroup<Opcion> radioMixto = (RadioButtonGroup<Opcion>) mixtoLayout.getComponentAt(0);
                     TextField otroCampo = (TextField) mixtoLayout.getComponentAt(1);
-
                     Opcion seleccion = radioMixto.getValue();
                     invalido = esObligatoria && (seleccion == null);
-
                     if (seleccion != null && Boolean.TRUE.equals(seleccion.getEsOtro())) {
                         invalido = invalido || (otroCampo.getValue() == null || otroCampo.getValue().isBlank());
                     }
@@ -320,18 +377,46 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
             }
         }
 
+        // Validación de campos del encuestado
+        if (nombreField.getValue() == null || nombreField.getValue().isBlank()
+                || apellidoField.getValue() == null || apellidoField.getValue().isBlank()
+                || correoField.getValue() == null || correoField.getValue().isBlank()
+                || generoCombo.getValue() == null || generoCombo.getValue().isBlank()
+                || fechaNacimientoPicker.getValue() == null) {
+            Notification.show("Debe completar todos los datos personales.", 4000, Notification.Position.MIDDLE);
+            validacionFallida = true;
+        }
+
         if (validacionFallida) {
-            Notification.show("Debe completar todas las preguntas obligatorias.", 4000, Notification.Position.MIDDLE);
+            Notification.show("Por favor complete todos los campos requeridos.", 4000, Notification.Position.MIDDLE);
             return;
         }
 
-        // Si pasó la validación, ahora sí guardamos normalmente
         try {
+            // Guardar encuestado asegurando no enviar nulls a Oracle
+            Encuestado nuevoEncuestado = new Encuestado();
+
+            String nombreSafe = Optional.ofNullable(nombreField.getValue()).orElse("").trim();
+            String apellidoSafe = Optional.ofNullable(apellidoField.getValue()).orElse("").trim();
+            String correoSafe = Optional.ofNullable(correoField.getValue()).orElse("").trim();
+
+            nuevoEncuestado.setNombres(nombreSafe.isEmpty() ? "SIN NOMBRE" : nombreSafe);
+            nuevoEncuestado.setApellidos(apellidoSafe.isEmpty() ? "SIN APELLIDO" : apellidoSafe);
+            nuevoEncuestado.setCorreo(correoSafe.isEmpty() ? "sin-correo@desconocido.com" : correoSafe);
+
+            nuevoEncuestado.setGenero(generoCombo.getValue());
+            nuevoEncuestado.setFechaNacimiento(fechaNacimientoPicker.getValue());
+
+            Encuestado encuestadoGuardado = encuestadoService.guardar(nuevoEncuestado);
+
+            // Guardar respuesta encuesta
             RespuestaEncuesta respuestaEncuesta = new RespuestaEncuesta();
             respuestaEncuesta.setFechaEnvio(LocalDateTime.now());
             respuestaEncuesta.setEncuesta(encuestaActual);
+            respuestaEncuesta.setEncuestado(encuestadoGuardado);
             respuestaEncuestaService.guardar(respuestaEncuesta);
 
+            // Guardar respuestas
             for (Map.Entry<Pregunta, Component> entry : componentesPorPregunta.entrySet()) {
                 Pregunta pregunta = entry.getKey();
                 Component componente = entry.getValue();
@@ -374,14 +459,11 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                         Div sliderDiv = (Div) componente;
                         Element inputElement = sliderDiv.getElement().getChild(0);
                         String valor = inputElement.getProperty("value");
-
                         if (valor == null || valor.isBlank()) {
                             valor = String.valueOf(pregunta.getValorInicioEscala());
                         }
-
                         Double valorDouble = Double.valueOf(valor);
                         respuesta.setValorEscala(valorDouble.intValue());
-
                     }
                     case 11 -> respuesta.setOpcion(((ComboBox<Opcion>) componente).getValue());
                     case 12 -> respuesta.setOpcion(((RadioButtonGroup<Opcion>) componente).getValue());
@@ -389,20 +471,19 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                         VerticalLayout mixtoLayout = (VerticalLayout) componente;
                         RadioButtonGroup<Opcion> radioMixto = (RadioButtonGroup<Opcion>) mixtoLayout.getComponentAt(0);
                         TextField otroCampo = (TextField) mixtoLayout.getComponentAt(1);
-
                         Opcion seleccion = radioMixto.getValue();
                         respuesta.setOpcion(seleccion);
-
                         if (seleccion != null && Boolean.TRUE.equals(seleccion.getEsOtro())) {
                             respuesta.setTextoAbierto(otroCampo.getValue());
                         }
                     }
                 }
-
                 respuestaService.guardar(respuesta);
             }
 
-            Notification.show("Respuestas guardadas correctamente.", 4000, Notification.Position.MIDDLE);
+            Notification.show("Respuestas guardadas exitosamente.", 4000, Notification.Position.MIDDLE);
+            mostrarDialogoGracias();
+
         } catch (Exception ex) {
             ex.printStackTrace();
             Notification.show("Error al guardar: " + ex.getMessage(), 4000, Notification.Position.MIDDLE);
