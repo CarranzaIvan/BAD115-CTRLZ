@@ -27,9 +27,6 @@ public class Opcion {
     @Column(name = "texto_opcion", length = 1000)
     private String textoOpcion;
 
-    @Column(name = "valor_escala")
-    private Integer valorEscala;
-
     @Column(name = "orden")
     private Integer orden;
 
@@ -39,12 +36,11 @@ public class Opcion {
     public Opcion() {
     }
 
-    public Opcion(Integer idOpcion, Pregunta pregunta, String textoOpcion, Integer valorEscala, Integer orden) {
-        this.idOpcion = idOpcion;
-        this.pregunta = pregunta;
+    public Opcion(Integer idOpcion, Pregunta pregunta, String textoOpcion, Integer orden) {
+        this.idOpcion    = idOpcion;
+        this.pregunta    = pregunta;
         this.textoOpcion = textoOpcion;
-        this.valorEscala = valorEscala;
-        this.orden = orden;
+        this.orden       = orden;
     }
 
     public Integer getIdOpcion() {
@@ -69,14 +65,6 @@ public class Opcion {
 
     public void setTextoOpcion(String textoOpcion) {
         this.textoOpcion = textoOpcion;
-    }
-
-    public Integer getValorEscala() {
-        return valorEscala;
-    }
-
-    public void setValorEscala(Integer valorEscala) {
-        this.valorEscala = valorEscala;
     }
 
     public Integer getOrden() {

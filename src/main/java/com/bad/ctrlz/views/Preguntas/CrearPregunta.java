@@ -15,8 +15,12 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.editor.Editor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H5;
+import com.vaadin.flow.component.html.ListItem;
+import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -29,9 +33,16 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.vaadin.flow.component.textfield.IntegerField;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Comparator;
+
 
 @Route(value = ":idEncuesta/preguntas", layout = MainLayout.class)
 @PageTitle("Preguntas de Encuesta")
@@ -87,12 +98,18 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             Button btnVer = new Button(new Icon("lumo", "search"));
             btnVer.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_PRIMARY);
             btnVer.getElement().setProperty("title", "Ver");
-            btnVer.addClickListener(e -> mostrarDetallePregunta(pregunta));
+            btnVer.addClickListener(e -> {
+                preguntaService.buscarConTipoYOpcionesPorId(pregunta.getIdPregunta())
+                    .ifPresent(this::mostrarDetallePregunta);
+            });
 
             Button btnEditar = new Button(new Icon("lumo", "edit"));
             btnEditar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
             btnEditar.getElement().setProperty("title", "Editar");
-            btnEditar.addClickListener(e -> mostrarFormularioEditar(pregunta));
+            btnEditar.addClickListener(e -> {
+                preguntaService.buscarConTipoYOpcionesPorId(pregunta.getIdPregunta())
+                    .ifPresent(this::mostrarFormularioEditar);
+            });
 
             Button btnEliminar = new Button(new Icon("lumo", "cross"));
             btnEliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
@@ -138,11 +155,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Nueva Pregunta");
 
-        //Creamos el objeto de seccionOpciones
-        List<Opcion> opcionesTemp = new ArrayList<>();
-        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp);
-        seccionOpciones.setVisible(false);
-
         // Obtenemos de la base sólo los tipos permitidos
         List<String> nombresPermitidos = Arrays.asList("Abiertas", "Cerradas", "Mixtas");
         List<TipoPregunta> tiposPermitidos = tipoPreguntaService.listarTodos().stream()
@@ -171,6 +183,14 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         comboCerradaEscalaTipo.setItems("Numérica", "Nominal", "Likert");
         comboCerradaEscalaTipo.setWidthFull();
         comboCerradaEscalaTipo.setVisible(false);
+
+
+        //Creamos el objeto de seccionOpciones
+        List<Opcion> opcionesTemp = new ArrayList<>();
+        VerticalLayout seccionOpciones = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
+        seccionOpciones.setVisible(false);
+
+
 
         // CAMPOS COMUNES
         TextArea textoPregunta = new TextArea("Texto de la Pregunta");
@@ -232,7 +252,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             incremento.setVisible(false);
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Ahora evaluamos cada sección
@@ -266,7 +286,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             // Activar campos según selección
@@ -291,7 +311,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
             seccionOpciones.removeAll();
 
             //Cargamos nuevamente la seccion de opciones
-            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp);
+            VerticalLayout nuevaSeccion = agregarSeccionOpciones(opcionesTemp,comboCerradaEleccionUnicaTipo,comboTipo);
             seccionOpciones.add(nuevaSeccion);
 
             inicioEscala.setVisible(false);
@@ -334,7 +354,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 return;
             }
 
-            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(Long.valueOf(idEncuesta));
+            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(idEncuesta);
             if (encuestaOpt.isEmpty()) {
                 Notification.show("Encuesta no encontrada.", 3000, Notification.Position.MIDDLE);
                 return;
@@ -428,10 +448,6 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Detalle de Pregunta");
 
-        TextField id = new TextField("ID");
-        id.setValue(String.valueOf(pregunta.getIdPregunta()));
-        id.setReadOnly(true);
-
         TextField tipo = new TextField("Tipo de Pregunta");
         tipo.setValue(pregunta.getTipoPregunta() != null ? pregunta.getTipoPregunta().getNombreTipo() : "(sin tipo)");
         tipo.setReadOnly(true);
@@ -445,6 +461,14 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         obligatorio.setValue("S".equalsIgnoreCase(pregunta.getObligatorio()));
         obligatorio.setReadOnly(true);
 
+        // Layout principal
+    VerticalLayout contenido = new VerticalLayout(tipo, texto, obligatorio);
+
+    // Determinamos el tipo de pregunta
+    String nombreTipo = (pregunta.getTipoPregunta() != null) ? pregunta.getTipoPregunta().getNombreTipo() : "";
+
+    // Si es numerica mostramos los campos de escala
+    if ("Numérica".equalsIgnoreCase(nombreTipo)) {
         NumberField inicio = new NumberField("Valor inicio escala");
         inicio.setValue(pregunta.getValorInicioEscala());
         inicio.setReadOnly(true);
@@ -457,8 +481,32 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         incremento.setValue(pregunta.getIncrementoEscala());
         incremento.setReadOnly(true);
 
-        VerticalLayout contenido = new VerticalLayout(
-                id, tipo, texto, obligatorio, inicio, fin, incremento);
+        contenido.add(inicio, fin, incremento);
+    }
+
+    // Si es Dicotómica o Mixtas mostramos las opciones como lista ordenada
+        if ("Dicotómica".equalsIgnoreCase(nombreTipo) || "Politómica".equalsIgnoreCase(nombreTipo) || "Elección Múltiple".equalsIgnoreCase(nombreTipo) || "Ranking".equalsIgnoreCase(nombreTipo) || "Nominal".equalsIgnoreCase(nombreTipo) || "Likert".equalsIgnoreCase(nombreTipo) || "Mixtas".equalsIgnoreCase(nombreTipo)) {
+
+            H5 titulo = new H5("Opciones de Respuesta");
+            
+            OrderedList listaOpciones = new OrderedList();
+
+            Set<Opcion> opciones = pregunta.getOpciones();
+            
+            if (opciones != null && !opciones.isEmpty()) {
+                opciones.stream()
+                    .sorted(Comparator.comparing(Opcion::getOrden))
+                    .forEach(op -> {
+                        String textoOp = op.getTextoOpcion();
+                        if (op.getesOtro()) {
+                            textoOp += " (Otro)";
+                        }
+                        listaOpciones.add(new ListItem(textoOp));
+                    });
+            }
+
+            contenido.add(titulo,listaOpciones);
+        }
 
         Button cerrar = new Button("Cerrar", e -> dialog.close());
         cerrar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -598,28 +646,125 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 comboCerradaEleccionUnicaTipo,
                 comboCerradaEscalaTipo,
                 textoPregunta,
-                chkObligatoria,
-                inicioEscala,
-                finEscala,
-                incremento);
+                chkObligatoria);
+
+
+        String nombreTipo = pregunta.getTipoPregunta().getNombreTipo();
+
+        // Si es tipo Numérica mostramos los campos de escala
+        if ("Numérica".equalsIgnoreCase(nombreTipo)) {
+            inicioEscala.setVisible(true);
+            finEscala.setVisible(true);
+            incremento.setVisible(true);
+            formulario.add(inicioEscala, finEscala, incremento);
+        } 
+
+
+        // Si es Dicotómica o Mixta mostramos las opciones
+        List<Opcion> opcionesList = pregunta.getOpciones().stream()
+                .sorted(Comparator.comparing(Opcion::getOrden))
+                .collect(Collectors.toList());
+
+        if ("Dicotómica".equalsIgnoreCase(nombreTipo) || "Mixtas".equalsIgnoreCase(nombreTipo)) {
+            Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
+            gridOpciones.setWidthFull();
+
+            // Columna Orden (solo visual)
+            gridOpciones.addColumn(Opcion::getOrden).setHeader("Orden");
+
+            // Columna editable Texto
+            Grid.Column<Opcion> textoCol = gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto");
+            Grid.Column<Opcion> esOtroCol = gridOpciones.addColumn(op -> op.getesOtro() ? "Sí" : "No").setHeader("Es Otro");
+
+            // Activamos el editor manualmente
+            Editor<Opcion> editor = gridOpciones.getEditor();
+            editor.setBuffered(true);
+
+            // Editor para texto
+            TextField textoField = new TextField();
+            textoCol.setEditorComponent(textoField);
+            textoField.addValueChangeListener(e -> {
+                Opcion opcion = editor.getItem();
+                opcion.setTextoOpcion(e.getValue());
+            });
+
+            // Editor para esOtro
+            Checkbox esOtroCheck = new Checkbox();
+            esOtroCol.setEditorComponent(esOtroCheck);
+            esOtroCheck.addValueChangeListener(e -> {
+                Opcion opcion = editor.getItem();
+                opcion.setesOtro(e.getValue());
+            });
+
+            // Lista observable de opciones
+            List<Opcion> opcionesList2 = new ArrayList<>(pregunta.getOpciones());
+            gridOpciones.setItems(opcionesList2);
+
+            // Permite abrir el editor al hacer doble clic
+            gridOpciones.addItemDoubleClickListener(event -> {
+                editor.editItem(event.getItem());
+            });
+
+            // Agregamos la columna de Acciones (Eliminar y Guardar)
+               gridOpciones.addComponentColumn(opcion -> {
+                HorizontalLayout acciones = new HorizontalLayout();
+
+                // Botón guardar (✔)
+                Button btnGuardar = new Button(new Icon("lumo", "checkmark"));
+                btnGuardar.addThemeVariants(ButtonVariant.LUMO_SUCCESS, ButtonVariant.LUMO_ICON);
+                btnGuardar.addClickListener(e -> {
+                    editor.save();
+                });
+
+                // Botón eliminar (❌)
+                Button btnEliminar = new Button(new Icon("lumo", "cross"));
+                btnEliminar.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_ICON);
+                btnEliminar.addClickListener(e -> {
+                        opcionesList.remove(opcion);
+                        opcionService.eliminar(opcion.getIdOpcion());
+                        
+                    gridOpciones.getDataProvider().refreshAll();
+                });
+
+                acciones.add(btnGuardar, btnEliminar);
+                return acciones;
+            }).setHeader("Acciones");
+
+            formulario.add(gridOpciones);
+        }
+
+                
 
         Button guardar = new Button("Guardar", e -> {
-            if (comboTipo.isEmpty() || textoPregunta.isEmpty()) {
-                Notification.show("Complete los campos obligatorios.", 3000, Notification.Position.MIDDLE);
-                return;
-            }
+               if (textoPregunta.isEmpty()) {
+            Notification.show("Complete los campos obligatorios.", 3000, Notification.Position.MIDDLE);
+            return;
+        }
 
-            pregunta.setTextoPregunta(textoPregunta.getValue());
-            pregunta.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
+        pregunta.setTextoPregunta(textoPregunta.getValue());
+        pregunta.setObligatorio(chkObligatoria.getValue() ? "S" : "N");
+
+        if ("Numérica".equalsIgnoreCase(nombreTipo)) {
             pregunta.setValorInicioEscala(inicioEscala.getValue());
             pregunta.setValorFinEscala(finEscala.getValue());
             pregunta.setIncrementoEscala(incremento.getValue());
+        }
 
-            preguntaService.guardar(pregunta);
-            dialog.close();
-            actualizarGrid();
-            Notification.show("Pregunta actualizada correctamente.", 3000, Notification.Position.TOP_CENTER);
-        });
+        // Guardar pregunta
+        preguntaService.guardar(pregunta);
+
+        // Guardar opciones (si existen)
+        if (!opcionesList.isEmpty()) {
+            for (Opcion opcion : opcionesList) {
+                opcion.setPregunta(pregunta);
+                opcionService.guardar(opcion);
+            }
+        }
+
+        dialog.close();
+        actualizarGrid();
+        Notification.show("Pregunta actualizada correctamente.", 3000, Notification.Position.TOP_CENTER);
+     });
 
         Button cancelar = new Button("Cancelar", e -> dialog.close());
         cancelar.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
@@ -631,46 +776,108 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
     }
 
 
-    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp) {
+    private VerticalLayout agregarSeccionOpciones(List<Opcion> opcionesTemp, ComboBox<String> comboCerradaEleccionUnicaTipo, ComboBox<TipoPregunta> comboTipo) {
+        
         Grid<Opcion> gridOpciones = new Grid<>(Opcion.class, false);
         gridOpciones.setHeight("200px");
         
         gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto").setAutoWidth(true);
         gridOpciones.addColumn(Opcion::getOrden).setHeader("Correlativo").setAutoWidth(true);
+
+        Grid.Column<Opcion> columnaSeleccion = gridOpciones.addComponentColumn(opcion -> {
+        Checkbox checkOtro = new Checkbox();
+        checkOtro.setValue(opcion.getesOtro());
+
+        checkOtro.addValueChangeListener(event -> {
+            if (event.getValue()) {
+                for (Opcion op : opcionesTemp) {
+                    op.setesOtro(false);
+                }
+                opcion.setesOtro(true);
+                gridOpciones.getDataProvider().refreshAll();
+            } else {
+                opcion.setesOtro(false);
+            }
+        });
+
+        return checkOtro;
+        }).setHeader("Selección");
+        
+        //Visibilidad de la columna seleccion
+        columnaSeleccion.setVisible(false);
+        comboTipo.addValueChangeListener(e -> {
+            boolean esMixta = e.getValue() != null && "Mixtas".equals(e.getValue().getNombreTipo());
+            columnaSeleccion.setVisible(esMixta);
+
+        });
+        
         gridOpciones.addComponentColumn(opcion -> {
             Button eliminar = new Button(new Icon("lumo", "cross"));
             eliminar.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR);
             eliminar.addClickListener(ev -> {
                 opcionesTemp.remove(opcion);
-                for (int i = 0; i < opcionesTemp.size(); i++) {
-                    opcionesTemp.get(i).setOrden(i + 1);
-                }
                 gridOpciones.setItems(opcionesTemp);
             });
             return eliminar;
         }).setHeader("Acciones");
 
         TextField textoOpcion = new TextField("Texto de opción");
-        NumberField orden = new NumberField("Correlativo");
+        IntegerField orden = new IntegerField("Correlativo");
+        orden.setMin(1);
         orden.setStep(1);
-        orden.setValue(0.0);
-        orden.setMin(0);
+        orden.setValue(1); // valor inicial
+        orden.setWidth("150px");
+
+        // Forzamos el atributo type="number" para habilitar las flechitas:
+        orden.getElement().setAttribute("type", "number");
 
         Button btnAgregarOpcion = new Button("Agregar Opción", e -> {
             if (textoOpcion.isEmpty()) {
-                Notification.show("Ingrese texto de opción");
+                Notification.show("Debe ingresar el texto de la opción.", 3000, Notification.Position.MIDDLE);
                 return;
             }
+
+            if (orden.isEmpty()) {
+                Notification.show("Debe ingresar el número de orden.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            int ordenIngresado = orden.getValue().intValue();
+
+            if (ordenIngresado < 1) {
+                Notification.show("El orden debe ser un número entero mayor o igual a 1.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            boolean yaExiste = opcionesTemp.stream()
+                    .anyMatch(op -> op.getOrden() != null && op.getOrden().equals(ordenIngresado));
+
+            if (yaExiste) {
+                Notification.show("El orden ingresado ya está asignado a otra opción.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
+            // Validación de máximo 2 cuando es Dicotómica
+            if ("Dicotómica".equals(comboCerradaEleccionUnicaTipo.getValue()) && opcionesTemp.size() >= 2) {
+                Notification.show("Solo puede ingresar máximo 2 opciones para preguntas dicotómicas");
+                return;
+            }
+
             Opcion nueva = new Opcion();
             nueva.setTextoOpcion(textoOpcion.getValue());
-            nueva.setOrden(orden.getValue().intValue());
+            nueva.setOrden(ordenIngresado);
             opcionesTemp.add(nueva);
             gridOpciones.setItems(opcionesTemp);
+
             textoOpcion.clear();
-            orden.setValue(0.0);
+            orden.setValue(1);
         });
 
-        VerticalLayout seccion = new VerticalLayout(textoOpcion, orden, btnAgregarOpcion, gridOpciones);
+        HorizontalLayout filaBoton = new HorizontalLayout(btnAgregarOpcion);
+        filaBoton.setWidthFull();
+        filaBoton.setJustifyContentMode(JustifyContentMode.END);
+
+        VerticalLayout seccion = new VerticalLayout( textoOpcion, orden, filaBoton, gridOpciones);
         seccion.setPadding(false);
         seccion.setSpacing(false);
         seccion.getStyle().set("border", "1px solid #ddd").set("padding", "10px");
