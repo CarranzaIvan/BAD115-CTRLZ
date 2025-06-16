@@ -1,4 +1,5 @@
 package com.bad.ctrlz.model;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -47,7 +48,7 @@ public class Usuario implements Serializable {
 
     @Column(name = "intentos_fallidos", nullable = false)
     int intentosFallidos = 0; // Intentos fallidos de inicio de sesión
-    
+
     @Column(name = "primer_ingreso", nullable = false)
     boolean primerIngreso; // Primer ingreso
 
@@ -73,7 +74,23 @@ public class Usuario implements Serializable {
     @Column(name = "fecha_actualizacion")
     private LocalDateTime fechaActualizacion;
 
-    public Usuario(){
+    public Usuario(String correo, String password, String nombre, String apellido,
+            boolean accountLocked, boolean accountNoExpired, boolean enabled) {
+        this.correo = correo;
+        this.password = password; //passwordEncoder.encode(password);
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.accountLocked = accountLocked;
+        this.accountNoExpired = accountNoExpired;
+        this.enabled = enabled;
+        this.credentialNoExpired = true;
+        this.primerIngreso = false;
+        this.intentosFallidos = 0;
+        this.fechaCreacion = LocalDateTime.now();
+        this.fechaActualizacion = LocalDateTime.now();
+    }
+
+    public Usuario() {
         // Constructor por defecto
         this.fechaCreacion = LocalDateTime.now();
         this.fechaActualizacion = LocalDateTime.now();
@@ -224,5 +241,5 @@ public class Usuario implements Serializable {
                 ", fechaActualizacion=" + fechaActualizacion +
                 '}';
     }
-    
+
 }

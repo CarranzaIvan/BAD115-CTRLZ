@@ -487,14 +487,22 @@ public class UserUnblockView extends VerticalLayout {
         }
 
         private void handleReject(Usuario request) {
-                // Aquí deberías implementar la lógica de rechazo en el servicio
-                usuarioService.rechazarSolicitud(request);
-                Notification notification = Notification.show(
-                                "Solicitud rechazada: " + request.getNombre(),
-                                3000,
-                                Notification.Position.TOP_END);
-                notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-                actualizarDatos();
+                if (usuarioService.enviarRechazoBloqueo(request.getCorreo())) {
+                        usuarioService.rechazarSolicitud(request);
+                        Notification notification = Notification.show(
+                                        "Solicitud rechazada: " + request.getNombre(),
+                                        3000,
+                                        Notification.Position.TOP_END);
+                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                        actualizarDatos();
+                } else {
+                        Notification notification = Notification.show(
+                                        "Error al rechazar solicitud",
+                                        3000,
+                                        Notification.Position.TOP_END);
+                        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+
         }
 
         private String hexToLight(String hex) {

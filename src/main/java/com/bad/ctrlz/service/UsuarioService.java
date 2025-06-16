@@ -47,8 +47,8 @@ public class UsuarioService {
         usuario.setRoles(rolUsuario);
 
         // Aquí puedes agregar lógica adicional antes de guardar el usuario
-        System.out.println(usuario.toString());
-
+        // String cotrasena = usuario.getPassword();
+        //usuario.setPassword(passwordEncoder.encode(contrasena));
         usuarioRepository.save(usuario);
 
         return true; // Usuario guardado exitosamente
@@ -94,6 +94,9 @@ public class UsuarioService {
         boolean enviado = false;
         enviado = emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombre,
                 consideracion);
+
+        //usuario.getPassword(passwordEncoder.encode(nuevaContrasena));
+        usuarioRepository.save(usuario);
         return enviado;
     }
 
@@ -173,8 +176,8 @@ public class UsuarioService {
         String nombreCompleto = usuario.getNombre() + " " + usuario.getApellido();
 
         // Aquí puedes guardar la nueva contraseña en la base si aplica
-        // usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
-        // usuarioRepository.save(usuario);
+        //usuario.setPassword(passwordEncoder.encode(nuevaContrasena));
+        usuarioRepository.save(usuario);
 
         // Enviar correo
         return emailService.sendEmail(subject, descripcion, correo, nuevaContrasena, nombreCompleto, consideracion);
