@@ -3,6 +3,7 @@ package com.bad.ctrlz.views.Seguridad;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.bad.ctrlz.model.Usuario;
 import com.bad.ctrlz.service.UsuarioService;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -224,10 +225,20 @@ public class LoginView extends VerticalLayout {
 
                 // Eventos de prueba
                 loginButton.addClickListener(event -> {
-                        System.out.println("LOGIN - Email: " + emailField.getValue());
-                        System.out.println("LOGIN - Password: " + passwordField.getValue());
+                String email = emailField.getValue();
+                String password = passwordField.getValue();
+
+                // Aquí llamas a tu servicio de validación
+                boolean esValido = usuarioService.validarCredenciales(email, password);
+
+                if (esValido) {
                         showSuccessNotification("¡Inicio de sesión exitoso!");
+                        UI.getCurrent().navigate("inicio");  // <-- Aquí haces la redirección a MainView
+                } else {
+                        showErrorNotification("Credenciales inválidas. Intenta nuevamente.");
+                }
                 });
+
 
                 // Agregar los campos y botones al formulario
                 formLayout.add(emailField, passwordField, loginButton, forgotPasswordButton);
