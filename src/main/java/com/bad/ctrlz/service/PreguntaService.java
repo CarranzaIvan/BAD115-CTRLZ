@@ -37,5 +37,8 @@ public class PreguntaService {
         return preguntaRepository.findAll();
     } 
 
-}
+    public List<Pregunta> obtenerPreguntasPorEncuesta(Integer idEncuesta) {
+        return preguntaRepository.findByEncuestaIdEncuesta(idEncuesta);
+    }
 
+}

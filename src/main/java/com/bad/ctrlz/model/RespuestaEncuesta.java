@@ -32,7 +32,7 @@ public class RespuestaEncuesta {
     @JoinColumn(name = "id_encuesta", nullable = false)
     private Encuesta encuesta;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 

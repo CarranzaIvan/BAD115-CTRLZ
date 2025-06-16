@@ -124,7 +124,7 @@ public class EditarEncuestaView extends VerticalLayout implements BeforeEnterObs
         if (idParam != null) {
             try {
                 int id = Integer.parseInt(idParam);
-                Optional<Encuesta> optionalEncuesta = encuestaService.buscarPorId(id);
+                Optional<Encuesta> optionalEncuesta = encuestaService.buscarPorId(Long.parseLong(idParam));
                 if (optionalEncuesta.isPresent()) {
                     encuestaExistente = optionalEncuesta.get();
                     binder.readBean(encuestaExistente);
