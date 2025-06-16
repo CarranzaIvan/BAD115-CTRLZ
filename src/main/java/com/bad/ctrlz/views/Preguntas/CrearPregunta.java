@@ -354,7 +354,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                 return;
             }
 
-            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(idEncuesta);
+            Optional<Encuesta> encuestaOpt = encuestaService.buscarPorId(Long.valueOf(idEncuesta));
             if (encuestaOpt.isEmpty()) {
                 Notification.show("Encuesta no encontrada.", 3000, Notification.Position.MIDDLE);
                 return;
@@ -498,7 +498,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
                     .sorted(Comparator.comparing(Opcion::getOrden))
                     .forEach(op -> {
                         String textoOp = op.getTextoOpcion();
-                        if (op.getesOtro()) {
+                        if (op.getEsOtro()) {
                             textoOp += " (Otro)";
                         }
                         listaOpciones.add(new ListItem(textoOp));
@@ -674,7 +674,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
             // Columna editable Texto
             Grid.Column<Opcion> textoCol = gridOpciones.addColumn(Opcion::getTextoOpcion).setHeader("Texto");
-            Grid.Column<Opcion> esOtroCol = gridOpciones.addColumn(op -> op.getesOtro() ? "Sí" : "No").setHeader("Es Otro");
+            Grid.Column<Opcion> esOtroCol = gridOpciones.addColumn(op -> op.getEsOtro() ? "Sí" : "No").setHeader("Es Otro");
 
             // Activamos el editor manualmente
             Editor<Opcion> editor = gridOpciones.getEditor();
@@ -786,7 +786,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
 
         Grid.Column<Opcion> columnaSeleccion = gridOpciones.addComponentColumn(opcion -> {
         Checkbox checkOtro = new Checkbox();
-        checkOtro.setValue(opcion.getesOtro());
+        checkOtro.setValue(opcion.getEsOtro());
 
         checkOtro.addValueChangeListener(event -> {
             if (event.getValue()) {
