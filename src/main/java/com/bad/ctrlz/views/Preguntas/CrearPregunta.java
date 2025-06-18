@@ -34,6 +34,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -77,11 +78,14 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         contenedor.getStyle().set("max-width", "900px");
         contenedor.getStyle().set("margin", "0 auto");
         contenedor.getStyle().set("padding", "1rem");
-
+        AtomicInteger contador = new AtomicInteger(1);
+        
         // Configuración del grid
         grid = new Grid<>(Pregunta.class, false);
         grid.setWidthFull();
-        grid.addColumn(Pregunta::getIdPregunta).setHeader("ID").setAutoWidth(true);
+        
+        contador.set(1);
+        grid.addColumn(p -> contador.getAndIncrement()).setHeader("N°").setAutoWidth(true);
         grid.addColumn(p -> {
             TipoPregunta tipo = p.getTipoPregunta();
             return tipo != null ? tipo.getNombreTipo() : "(sin tipo)";
@@ -123,6 +127,7 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         contenedor.add(grid);
         contenedor.setWidthFull();
         contenedor.setHeight("auto");
+        contador.set(1);
 
         add(contenedor);
 
@@ -131,6 +136,14 @@ public class CrearPregunta extends VerticalLayout implements BeforeEnterObserver
         btnAgregar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         btnAgregar.getStyle().set("margin", "1rem auto 0 auto");
         add(btnAgregar);
+
+        //Boton regresar
+        Button btnRegresar = new Button("← Volver");
+        btnRegresar.addClickListener(event ->
+                btnRegresar.getUI().ifPresent(ui -> ui.navigate("dashboard-encuestas"))
+        );
+        add(btnRegresar);
+
     }
 
     @Override

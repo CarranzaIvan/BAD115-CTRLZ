@@ -38,7 +38,7 @@ public class GraficoBarrasView extends VerticalLayout implements HasUrlParameter
         );
 
         Button btnInicio = new Button("Ir a Inicio", e ->
-            getUI().ifPresent(ui -> ui.navigate(""))
+            getUI().ifPresent(ui -> ui.navigate("inicio"))
         );
 
         HorizontalLayout navegacion = new HorizontalLayout(btnVolver, btnDashboard, btnInicio);

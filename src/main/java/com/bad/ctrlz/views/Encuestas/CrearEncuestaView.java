@@ -36,6 +36,14 @@ public class CrearEncuestaView extends VerticalLayout {
 
         Div card = construirFormulario();
         add(card);
+
+        //Boton regresar
+        Button btnRegresar = new Button("← Volver");
+        btnRegresar.getStyle().set("margin", "1rem auto 0 auto");
+        btnRegresar.addClickListener(event ->
+                btnRegresar.getUI().ifPresent(ui -> ui.navigate("dashboard-encuestas"))
+        );
+        add(btnRegresar);
     }
 
     private Div construirFormulario() {

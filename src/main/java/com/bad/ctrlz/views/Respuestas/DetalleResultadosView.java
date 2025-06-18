@@ -2,6 +2,7 @@ package com.bad.ctrlz.views.Respuestas;
 
 import com.bad.ctrlz.dto.PreguntaDetalleDTO;
 import com.bad.ctrlz.service.EncuestaService;
+import com.bad.ctrlz.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
@@ -14,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route("detalle-resultados/:idEncuesta")
+@Route(value="detalle-resultados/:idEncuesta", layout = MainLayout.class)
 @PageTitle("Detalle de Resultados por Encuesta")
 @PermitAll
 public class DetalleResultadosView extends VerticalLayout implements BeforeEnterObserver {
@@ -33,7 +34,7 @@ public class DetalleResultadosView extends VerticalLayout implements BeforeEnter
         add(titulo, grid); // se mantiene igual
 
         // Botones de navegación al final
-        Button btnVolver = new Button("Volver", e ->
+        Button btnVolver = new Button("← Volver", e ->
             getUI().ifPresent(ui -> ui.getPage().getHistory().back())
         );
 
