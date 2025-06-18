@@ -31,9 +31,8 @@ public class DashboardEncuestasView extends VerticalLayout {
         setMargin(true);
         setSpacing(true);
         setPadding(true);
-        
+
         H2 titulo = new H2("Gestión de Encuestas");
-        
 
         Button crearBtn = new Button("Crear Encuesta", e -> getUI().ifPresent(ui -> ui.navigate("crear-encuesta")));
         crearBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
@@ -124,7 +123,7 @@ public class DashboardEncuestasView extends VerticalLayout {
     }
 
     private void generarLinkEncuesta(Encuesta encuesta) {
-        String baseUrl = "http://3.149.249:8090/public/encuesta/";
+        String baseUrl = "http://3.149.249.26:8090/public/encuesta/";
 
         // Si ya tiene un link generado, lo usamos
         if (encuesta.getLinkPublico() != null && !encuesta.getLinkPublico().isEmpty()) {
@@ -150,24 +149,17 @@ public class DashboardEncuestasView extends VerticalLayout {
 
         Button copiarBtn = new Button("Copiar");
         copiarBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+
+        // Ejecutar JS para copiar y mostrar retroalimentación directamente
         copiarBtn.addClickListener(e -> {
             linkField.getElement().executeJs(
-                    "navigator.clipboard.writeText($0).then(function() {" +
-                            "  $1.$server.copied();" +
+                    "navigator.clipboard.writeText($0).then(() => {" +
+                            "  $1.innerText = '¡Copiado!';" +
+                            "}).catch(err => {" +
+                            "  alert('No se pudo copiar el enlace automáticamente. Copie manualmente.');" +
                             "});",
-                    linkField.getValue(), copiarBtn);
-        });
-
-        // Agregamos feedback visual en el servidor (opcional)
-        copiarBtn.getElement().setProperty("serverOnly", true);
-        copiarBtn.getElement().addPropertyChangeListener("copied", e -> {
-            copiarBtn.setText("¡Copiado!");
-        });
-
-        // Alternativamente, mucho más simple:
-        copiarBtn.addClickListener(e -> {
-            linkField.getElement().executeJs("navigator.clipboard.writeText($0);", linkField.getValue());
-            copiarBtn.setText("¡Copiado!");
+                    linkField.getValue(),
+                    copiarBtn.getElement());
         });
 
         Button cerrar = new Button("Cerrar", e -> dialog.close());
@@ -179,4 +171,5 @@ public class DashboardEncuestasView extends VerticalLayout {
         dialog.add(label, linkField, botones);
         dialog.open();
     }
+
 }
