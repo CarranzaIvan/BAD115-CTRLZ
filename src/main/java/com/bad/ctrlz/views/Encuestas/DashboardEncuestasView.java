@@ -31,13 +31,15 @@ public class DashboardEncuestasView extends VerticalLayout {
         setMargin(true);
         setSpacing(true);
         setPadding(true);
+        
+        H2 titulo = new H2("Gestión de Encuestas");
+        
 
         Button crearBtn = new Button("Crear Encuesta", e -> getUI().ifPresent(ui -> ui.navigate("crear-encuesta")));
         crearBtn.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         crearBtn.getStyle().set("margin-bottom", "20px").set("font-weight", "bold");
 
-        H2 titulo = new H2("Gestión de Encuestas");
-        add(crearBtn, titulo);
+        add(titulo, crearBtn);
         cargarEncuestas();
     }
 

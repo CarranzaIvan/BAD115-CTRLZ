@@ -10,12 +10,13 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.bad.ctrlz.views.MainLayout;
 
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
-@Route("dashboard-respuestas")
+@Route(value = ":dashboard-respuestas", layout = MainLayout.class)
 @PageTitle("Dashboard de Respuestas por Encuesta")
 @PermitAll
 public class DashboardRespuestasView extends VerticalLayout {
@@ -39,7 +40,7 @@ public class DashboardRespuestasView extends VerticalLayout {
         );
 
         Button btnInicio = new Button("Ir a Inicio", e ->
-            getUI().ifPresent(ui -> ui.navigate(""))
+            getUI().ifPresent(ui -> ui.navigate("inicio"))
         );
 
         HorizontalLayout navegacion = new HorizontalLayout(btnVolver, btnInicio);

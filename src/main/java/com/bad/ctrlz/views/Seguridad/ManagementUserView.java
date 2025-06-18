@@ -1,5 +1,6 @@
 package com.bad.ctrlz.views.Seguridad;
 
+import com.bad.ctrlz.views.MainView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
@@ -13,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
+
 
 @PageTitle("Inicio | Usuarios")
 @Route(value = "inicio-administracion-usuarios")
@@ -28,9 +30,32 @@ public class ManagementUserView extends VerticalLayout {
         // Apply gradient background to the entire view
         getStyle().set("background", "linear-gradient(135deg, #2c3e50 0%, #4a4a4a 50%, #666666 100%)");
         getStyle().set("min-height", "100vh");
-        
+
         createHeader();
         createDashboard();
+
+        // Ícono de casa
+        Icon casaIcono = VaadinIcon.HOME.create();
+        casaIcono.getStyle()
+            .set("margin-right", "5px")
+            .set("color", "#ffffff ");
+
+        // Enlaces de navegación
+        RouterLink inicioLink = new RouterLink("", MainView.class);
+        inicioLink.add(casaIcono, new com.vaadin.flow.component.html.Span("Inicio"));
+        inicioLink.getStyle()
+            .set("font-size", "16px")       // Aumenta el tamaño de fuente
+            .set("color", "#ffffff ")          // Establece el color del texto
+            .set("font-weight", "bold");    // (Opcional) Negrita para destacarlo más
+
+        
+        // Layout de navegación alineado a la derecha
+        HorizontalLayout navLinks = new HorizontalLayout(inicioLink);
+        navLinks.setSpacing(true);
+        navLinks.setAlignItems(FlexComponent.Alignment.END);
+        navLinks.getStyle().set("margin-right", "20px");
+        
+        add(navLinks);
     }
 
     private void createHeader() {

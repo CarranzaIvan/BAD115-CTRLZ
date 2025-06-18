@@ -8,13 +8,13 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
-
+import com.bad.ctrlz.views.MainLayout;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-@Route("ver-respuestas/:idPregunta")
+@Route(value="ver-respuestas/:idPregunta", layout = MainLayout.class)
 @PageTitle("Respuestas de Pregunta")
 @PermitAll
 public class VerRespuestasPreguntaView extends VerticalLayout implements BeforeEnterObserver {
