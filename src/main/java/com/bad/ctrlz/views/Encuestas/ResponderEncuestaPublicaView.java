@@ -152,7 +152,7 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
 
         Button cerrar = new Button("Cerrar", e -> {
             dialog.close();
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/")); // Redirige a inicio (puedes cambiar la ruta)
+            getUI().ifPresent(ui -> ui.getPage().reload());
         });
 
         cerrar.getStyle().set("background-color", "#1565c0").set("color", "white");
@@ -248,10 +248,9 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                 inputRange.setAttribute("value", String.valueOf(min));
                 inputRange.getStyle().set("width", "100%");
 
-                // Agregamos sincronización al servidor
                 inputRange.addEventListener("input", e -> {
-                    inputRange.setProperty("serverValue", inputRange.getProperty("value"));
-                });
+                    inputRange.setProperty("serverValue", e.getEventData().getString("event.target.value"));
+                }).addEventData("event.target.value");
 
                 inputRange.executeJs("this.addEventListener('input', function() { $0.textContent = this.value; });",
                         valorActual.getElement());
@@ -498,7 +497,8 @@ public class ResponderEncuestaPublicaView extends VerticalLayout implements HasU
                     case 10 -> {
                         Div sliderDiv = (Div) componente;
                         Element inputElement = sliderDiv.getElement().getChild(0);
-                        String valor = inputElement.getProperty("value");
+                        String valor = inputElement.getProperty("serverValue");
+
                         if (valor == null || valor.isBlank()) {
                             valor = String.valueOf(pregunta.getValorInicioEscala());
                         }
