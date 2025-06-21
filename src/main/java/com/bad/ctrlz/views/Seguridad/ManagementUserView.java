@@ -2,6 +2,7 @@ package com.bad.ctrlz.views.Seguridad;
 
 import com.bad.ctrlz.views.MainView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
@@ -26,10 +27,24 @@ public class ManagementUserView extends VerticalLayout {
         setSpacing(true);
         setAlignItems(FlexComponent.Alignment.CENTER);
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        
-        // Apply gradient background to the entire view
+
+        // Fondo degradado
         getStyle().set("background", "linear-gradient(135deg, #2c3e50 0%, #4a4a4a 50%, #666666 100%)");
         getStyle().set("min-height", "100vh");
+
+        // Botones
+        Button btnVolver = new Button("Volver", new Icon(VaadinIcon.ARROW_LEFT));
+        btnVolver.getStyle().set("background-color", "#3B82F6").set("color", "white");
+        btnVolver.addClickListener(e -> getUI().ifPresent(ui -> ui.getPage().getHistory().back()));
+
+        Button btnInicio = new Button("Inicio", new Icon(VaadinIcon.HOME));
+        btnInicio.getStyle().set("background-color", "#2563EB").set("color", "white");
+        btnInicio.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("inicio")));
+
+        HorizontalLayout navegacion = new HorizontalLayout(btnVolver, btnInicio);
+        navegacion.setSpacing(true);
+        navegacion.setAlignItems(FlexComponent.Alignment.CENTER);
+        add(navegacion); // 👈 Esto antes del header
 
         createHeader();
         createDashboard();

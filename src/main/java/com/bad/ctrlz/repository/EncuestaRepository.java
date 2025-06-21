@@ -14,12 +14,11 @@ public interface EncuestaRepository extends JpaRepository<Encuesta, Long> {
     @Query("""
         SELECT e, COUNT(re)
         FROM Encuesta e
-        LEFT JOIN e.preguntas p
-        LEFT JOIN p.respuestas r
-        LEFT JOIN r.respuestaEncuesta re
+        LEFT JOIN RespuestaEncuesta re ON re.encuesta.id = e.id
         GROUP BY e
-    """)
+        """)
     List<Object[]> obtenerDashboardRespuestas();
+
     Optional<Encuesta> findByLinkPublico(String linkPublico);
 }
 
